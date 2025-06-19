@@ -1,73 +1,105 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, BookOpen } from 'lucide-react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, Menu, User, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Poetry', path: '/poetry' },
-    { name: 'Parables', path: '/parables' },
-    { name: 'Book Picks', path: '/book-picks' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Store', path: '/store' },
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const navigation = [
+    { name: 'Blog', href: '/blog' },
+    { name: 'Poetry', href: '/poetry' },
+    { name: 'Parables', href: '/parables' },
+    { name: 'Book Picks', href: '/book-picks' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Store', href: '/store' },
   ];
 
   return (
-    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-center h-16">
+    <header className="bg-background border-b border-warm-200 sticky top-0 z-50">
+      <div className="section-container">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <BookOpen className="h-6 w-6 text-primary group-hover:text-warm-700 transition-colors" />
-            <span className="font-serif text-xl font-semibold text-primary group-hover:text-warm-700 transition-colors">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <BookOpen className="h-8 w-8 text-warm-700" />
+            <span className="font-serif text-xl font-semibold text-primary">
               TheWatchTower
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {navigation.map((item) => (
               <Link
                 key={item.name}
-                to={item.path}
-                className="text-foreground hover:text-primary transition-colors duration-200 text-sm font-medium"
+                to={item.href}
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+          {/* Auth Section */}
+          <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asButton>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">
+                      {user?.user_metadata?.full_name || user?.email}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-border animate-slide-in">
-            <nav className="py-4 space-y-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
+            {/* Mobile Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asButton className="md:hidden">
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {navigation.map((item) => (
+                  <DropdownMenuItem key={item.name} asChild>
+                    <Link to={item.href}>{item.name}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );

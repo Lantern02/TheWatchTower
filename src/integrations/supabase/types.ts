@@ -9,7 +9,138 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      book_recommendations: {
+        Row: {
+          amazon_link: string | null
+          author: string
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          featured: boolean | null
+          id: string
+          recommendation_text: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          amazon_link?: string | null
+          author: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          recommendation_text: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          amazon_link?: string | null
+          author?: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          recommendation_text?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          active: boolean | null
+          email: string
+          id: string
+          name: string | null
+          subscribed_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          email: string
+          id?: string
+          name?: string | null
+          subscribed_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          email?: string
+          id?: string
+          name?: string | null
+          subscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          author_id: string
+          category: string
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          featured: boolean | null
+          id: string
+          published: boolean | null
+          slug: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          category: string
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured?: boolean | null
+          id?: string
+          published?: boolean | null
+          slug?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured?: boolean | null
+          id?: string
+          published?: boolean | null
+          slug?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
