@@ -18,7 +18,10 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
   const { toast } = useToast();
 
   const save = useCallback(async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || !sectionId) {
+      console.log('Cannot save: missing title or sectionId');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -36,7 +39,10 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
           })
           .eq('id', postId);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
       } else {
         // Create new post
         const { data, error } = await supabase
@@ -51,7 +57,10 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
           .select()
           .single();
           
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         
         // Update URL to include new post ID
         if (data) {
@@ -60,27 +69,31 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
       }
       
       setLastSaved(new Date());
+      console.log('Post saved successfully');
     } catch (error: any) {
+      console.error('Save failed:', error);
       toast({
         variant: "destructive",
         title: "Save failed",
-        description: error.message,
+        description: error.message || 'An error occurred while saving',
       });
     } finally {
       setSaving(false);
     }
   }, [title, content, postId, sectionId, toast]);
 
-  // Auto-save every 2 seconds when content changes
+  // Auto-save every 3 seconds when content changes
   useEffect(() => {
+    if (!title.trim() || !sectionId) return;
+    
     const timer = setTimeout(() => {
-      if (title.trim() && (title !== initialTitle || JSON.stringify(content) !== JSON.stringify(initialContent))) {
+      if (title !== initialTitle || JSON.stringify(content) !== JSON.stringify(initialContent)) {
         save();
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer);
-  }, [title, content, save, initialTitle, initialContent]);
+  }, [title, content, save, initialTitle, initialContent, sectionId]);
 
   return {
     title,

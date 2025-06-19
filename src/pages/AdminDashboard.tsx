@@ -1,14 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Eye, BookOpen, TrendingUp, Plus } from 'lucide-react';
+import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminDashboard = () => {
+  const [newCategoryTitle, setNewCategoryTitle] = useState('');
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const { toast } = useToast();
+
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
@@ -31,7 +37,7 @@ const AdminDashboard = () => {
     },
   });
 
-  const { data: sections } = useQuery({
+  const { data: sections, refetch: refetchSections } = useQuery({
     queryKey: ['sections'],
     queryFn: async () => {
       const { data } = await supabase
@@ -42,29 +48,95 @@ const AdminDashboard = () => {
     },
   });
 
+  const createCategory = async () => {
+    if (!newCategoryTitle.trim()) return;
+    
+    setCreatingCategory(true);
+    try {
+      const slug = newCategoryTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const { error } = await supabase
+        .from('sections')
+        .insert([{
+          title: newCategoryTitle,
+          slug,
+          is_active: true,
+          show_in_navigation: true,
+          position: (sections?.length || 0) + 1
+        }]);
+
+      if (error) throw error;
+
+      setNewCategoryTitle('');
+      refetchSections();
+      toast({
+        title: "Category created",
+        description: `${newCategoryTitle} has been added successfully.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to create category",
+        description: error.message,
+      });
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
   const chartData = stats?.posts.map(post => ({
     name: post.title.substring(0, 20) + '...',
     views: post.view_count,
     reads: post.read_completion_count
   })) || [];
 
-  const COLORS = ['#8B5A2B', '#A0522D', '#CD853F', '#DEB887'];
+  const COLORS = ['#374151', '#4B5563', '#6B7280', '#9CA3AF'];
+
+  const defaultSection = sections?.find(s => s.slug === 'blog');
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-serif font-bold text-primary">Dashboard</h1>
         <div className="flex gap-2">
-          {sections?.map(section => (
-            <Link key={section.id} to={`/admin/posts/new?section=${section.id}`}>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                New {section.title}
-              </Button>
-            </Link>
-          ))}
+          <Link to={`/admin/posts/new?section=${defaultSection?.id || ''}`}>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Post
+            </Button>
+          </Link>
         </div>
       </div>
+
+      {/* Category Management */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FolderPlus className="h-5 w-5" />
+            Manage Categories
+          </CardTitle>
+          <CardDescription>Create and organize your content categories</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 mb-4">
+            <Input
+              placeholder="Category name"
+              value={newCategoryTitle}
+              onChange={(e) => setNewCategoryTitle(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && createCategory()}
+            />
+            <Button onClick={createCategory} disabled={creatingCategory || !newCategoryTitle.trim()}>
+              {creatingCategory ? 'Creating...' : 'Add Category'}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {sections?.map(section => (
+              <div key={section.id} className="bg-secondary px-3 py-1 rounded-full text-sm">
+                {section.title}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-4 gap-6 mb-8">
@@ -125,8 +197,8 @@ const AdminDashboard = () => {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="views" fill="#8B5A2B" />
-                <Bar dataKey="reads" fill="#A0522D" />
+                <Bar dataKey="views" fill="#374151" />
+                <Bar dataKey="reads" fill="#4B5563" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -135,7 +207,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle>Content Distribution</CardTitle>
-            <CardDescription>Posts by section</CardDescription>
+            <CardDescription>Posts by category</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -143,7 +215,7 @@ const AdminDashboard = () => {
                 <Pie
                   data={sections?.map((section, index) => ({
                     name: section.title,
-                    value: Math.random() * 10 + 1, // This would be actual post counts
+                    value: Math.random() * 10 + 1,
                     fill: COLORS[index % COLORS.length]
                   }))}
                   cx="50%"

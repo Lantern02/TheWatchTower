@@ -63,44 +63,49 @@ const MediumEditor = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            {saving ? 'Saving...' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : 'Draft'}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={save}>
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-          <Button
-            variant={isPublished ? "default" : "outline"}
-            size="sm"
-            onClick={togglePublish}
-          >
-            {isPublished ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-            {isPublished ? 'Published' : 'Publish'}
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Fixed Header */}
+      <div className="sticky top-0 bg-background/80 backdrop-blur-sm border-b border-border z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                {saving ? 'Saving...' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : 'Draft'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={save}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+              <Button
+                variant={isPublished ? "default" : "outline"}
+                size="sm"
+                onClick={togglePublish}
+              >
+                {isPublished ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
+                {isPublished ? 'Published' : 'Publish'}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <Card className="p-8">
+      {/* Editor Content */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Cover Image */}
         <div className="mb-8">
           {coverImage ? (
-            <div className="relative">
+            <div className="relative group">
               <img
                 src={coverImage}
                 alt="Cover"
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-80 object-cover rounded-lg"
               />
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="absolute top-4 right-4"
+                className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
@@ -109,12 +114,12 @@ const MediumEditor = ({
             </div>
           ) : (
             <div
-              className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50"
+              className="w-full h-80 border border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:bg-accent/50 transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               <div className="text-center">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Click to add a cover image</p>
+                <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Add a cover image</p>
               </div>
             </div>
           )}
@@ -132,29 +137,29 @@ const MediumEditor = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title"
-          className="text-4xl font-serif border-none p-0 mb-8 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+          className="text-5xl font-serif border-none p-0 mb-8 placeholder:text-muted-foreground/50 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px]"
         />
 
         {/* Content Editor */}
         <div
           ref={contentRef}
           contentEditable
-          className="min-h-96 prose prose-lg max-w-none focus:outline-none"
+          className="min-h-96 prose prose-lg max-w-none focus:outline-none text-foreground"
           onInput={handleContentChange}
           dangerouslySetInnerHTML={{ __html: content.html || '' }}
           style={{
-            fontSize: '18px',
-            lineHeight: '1.6',
-            color: '#374151'
+            fontSize: '21px',
+            lineHeight: '1.58',
+            letterSpacing: '-0.003em'
           }}
         />
         
-        {contentRef.current?.innerHTML === '' && (
-          <p className="text-gray-400 text-lg mt-4 pointer-events-none">
+        {(!content.html || content.html === '') && (
+          <p className="text-muted-foreground/50 text-xl mt-4 pointer-events-none">
             Tell your story...
           </p>
         )}
-      </Card>
+      </div>
     </div>
   );
 };
