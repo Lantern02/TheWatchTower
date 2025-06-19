@@ -60,7 +60,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asButton>
+                <DropdownMenuTrigger>
                   <Button variant="ghost" size="sm" className="gap-2">
                     <User className="h-4 w-4" />
                     <span className="hidden sm:inline">
@@ -85,7 +85,7 @@ const Header = () => {
 
             {/* Mobile Menu */}
             <DropdownMenu>
-              <DropdownMenuTrigger asButton className="md:hidden">
+              <DropdownMenuTrigger className="md:hidden">
                 <Button variant="ghost" size="sm">
                   <Menu className="h-4 w-4" />
                 </Button>
