@@ -20,9 +20,13 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        navigate('/');
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
       }
     };
     checkUser();
@@ -34,7 +38,7 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -45,19 +49,33 @@ const Auth = () => {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Sign up error:', error);
+          throw error;
+        }
 
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your signup.",
-        });
+        if (data.user && !data.user.email_confirmed_at) {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a confirmation link to complete your signup.",
+          });
+        } else {
+          toast({
+            title: "Welcome!",
+            description: "Account created successfully.",
+          });
+          navigate('/');
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Sign in error:', error);
+          throw error;
+        }
 
         toast({
           title: "Welcome back!",
@@ -67,10 +85,11 @@ const Auth = () => {
         navigate('/');
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: error.message,
+        description: error.message || 'An unexpected error occurred',
       });
     } finally {
       setLoading(false);

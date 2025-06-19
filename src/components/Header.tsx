@@ -77,13 +77,13 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
                     <User className="h-4 w-4" />
                     <span className="hidden sm:inline">
                       {user?.user_metadata?.full_name || user?.email}
                     </span>
-                  </Button>
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
@@ -110,9 +110,7 @@ const Header = () => {
             {/* Mobile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger className="md:hidden">
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-4 w-4" />
-                </Button>
+                <Menu className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 {sections?.map((section) => (
