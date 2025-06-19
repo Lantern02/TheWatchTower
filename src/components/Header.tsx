@@ -42,13 +42,13 @@ const Header = () => {
   ) || [];
 
   return (
-    <header className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="section-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <BookOpen className="h-8 w-8 text-white" />
-            <span className="font-serif text-xl font-semibold text-white">
+            <BookOpen className="h-8 w-8 text-blue-600" />
+            <span className="font-serif text-xl font-semibold text-gray-900">
               TheWatchTower
             </span>
           </Link>
@@ -59,20 +59,20 @@ const Header = () => {
               <Link
                 key={section.id}
                 to={`/${section.slug}`}
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-gray-600 hover:text-blue-600 transition-colors"
               >
                 {section.title}
               </Link>
             ))}
             <Link
               to="/about"
-              className="text-gray-300 hover:text-white transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               About
             </Link>
             <Link
               to="/store"
-              className="text-gray-300 hover:text-white transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               Store
             </Link>
@@ -86,7 +86,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative text-gray-300 hover:text-white hover:bg-gray-800"
+                  className="relative text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
@@ -97,21 +97,21 @@ const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                      <User className="h-4 w-4 text-white" />
-                      <span className="hidden sm:inline text-white">
+                      <User className="h-4 w-4 text-gray-600" />
+                      <span className="hidden sm:inline text-gray-900">
                         WordBasket
                       </span>
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                  <DropdownMenuContent align="end" className="bg-white border-gray-200">
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="text-gray-300 hover:text-white">
+                      <Link to="/admin" className="text-gray-600 hover:text-blue-600">
                         <Settings className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-gray-300 hover:text-white">
+                    <DropdownMenuSeparator className="bg-gray-200" />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-gray-600 hover:text-blue-600">
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
                     </DropdownMenuItem>
@@ -120,7 +120,7 @@ const Header = () => {
               </>
             ) : (
               <Link to="/auth">
-                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                <Button variant="outline" size="sm" className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700">
                   Sign In
                 </Button>
               </Link>
@@ -129,19 +129,19 @@ const Header = () => {
             {/* Mobile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger className="md:hidden">
-                <Menu className="h-4 w-4 text-white" />
+                <Menu className="h-4 w-4 text-gray-600" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-gray-800 border-gray-700">
+              <DropdownMenuContent align="end" className="w-48 bg-white border-gray-200">
                 {filteredSections.map((section) => (
                   <DropdownMenuItem key={section.id} asChild>
-                    <Link to={`/${section.slug}`} className="text-gray-300 hover:text-white">{section.title}</Link>
+                    <Link to={`/${section.slug}`} className="text-gray-600 hover:text-blue-600">{section.title}</Link>
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuItem asChild>
-                  <Link to="/about" className="text-gray-300 hover:text-white">About</Link>
+                  <Link to="/about" className="text-gray-600 hover:text-blue-600">About</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/store" className="text-gray-300 hover:text-white">Store</Link>
+                  <Link to="/store" className="text-gray-600 hover:text-blue-600">Store</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
