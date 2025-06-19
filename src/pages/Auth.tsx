@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Mail, Lock, User } from 'lucide-react';
+import { BookOpen, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,6 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,9 +42,6 @@ const Auth = () => {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: fullName,
-            }
           }
         });
 
@@ -113,26 +109,6 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
-            {isSignUp && (
-              <div className="space-y-2">
-                <label htmlFor="fullName" className="text-sm font-medium text-gray-700">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Your full name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-            
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email
