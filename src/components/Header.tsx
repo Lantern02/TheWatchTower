@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Menu, User, LogOut } from 'lucide-react';
+import { BookOpen, Menu, User, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,27 +18,31 @@ const Header = () => {
   const { user, signOut, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const { data: sections } = useQuery({
+    queryKey: ['nav-sections'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('sections')
+        .select('*')
+        .eq('is_active', true)
+        .eq('show_in_navigation', true)
+        .order('position');
+      return data || [];
+    },
+  });
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const navigation = [
-    { name: 'Blog', href: '/blog' },
-    { name: 'Poetry', href: '/poetry' },
-    { name: 'Prophecy', href: '/prophecy' },
-    { name: 'Book Picks', href: '/book-picks' },
-    { name: 'About', href: '/about' },
-    { name: 'Store', href: '/store' },
-  ];
-
   return (
-    <header className="bg-background border-b border-warm-200 sticky top-0 z-50">
+    <header className="bg-background border-b border-amber-200 sticky top-0 z-50">
       <div className="section-container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <BookOpen className="h-8 w-8 text-warm-700" />
+            <BookOpen className="h-8 w-8 text-amber-700" />
             <span className="font-serif text-xl font-semibold text-primary">
               TheWatchTower
             </span>
@@ -44,15 +50,27 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
+            {sections?.map((section) => (
               <Link
-                key={item.name}
-                to={item.href}
+                key={section.id}
+                to={`/${section.slug}`}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                {item.name}
+                {section.title}
               </Link>
             ))}
+            <Link
+              to="/about"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              to="/store"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Store
+            </Link>
           </nav>
 
           {/* Auth Section */}
@@ -68,6 +86,13 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
@@ -90,11 +115,17 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                {navigation.map((item) => (
-                  <DropdownMenuItem key={item.name} asChild>
-                    <Link to={item.href}>{item.name}</Link>
+                {sections?.map((section) => (
+                  <DropdownMenuItem key={section.id} asChild>
+                    <Link to={`/${section.slug}`}>{section.title}</Link>
                   </DropdownMenuItem>
                 ))}
+                <DropdownMenuItem asChild>
+                  <Link to="/about">About</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/store">Store</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

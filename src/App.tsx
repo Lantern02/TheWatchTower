@@ -7,14 +7,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Index from "./pages/Index";
-import Blog from "./pages/Blog";
-import Poetry from "./pages/Poetry";
-import Prophecy from "./pages/Prophecy";
-import BookPicks from "./pages/BookPicks";
 import About from "./pages/About";
 import Store from "./pages/Store";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
+import DynamicSection from "./pages/DynamicSection";
+import MediumEditor from "./components/MediumEditor";
 
 const queryClient = new QueryClient();
 
@@ -29,13 +28,22 @@ const App = () => (
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/poetry" element={<Poetry />} />
-              <Route path="/prophecy" element={<Prophecy />} />
-              <Route path="/book-picks" element={<BookPicks />} />
               <Route path="/about" element={<About />} />
               <Route path="/store" element={<Store />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/posts/new" element={
+                <MediumEditor 
+                  sectionId={new URLSearchParams(window.location.search).get('section') || ''} 
+                />
+              } />
+              <Route path="/admin/posts/:postId" element={
+                <MediumEditor 
+                  postId={window.location.pathname.split('/').pop()} 
+                  sectionId=""
+                />
+              } />
+              <Route path="/:slug" element={<DynamicSection />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
