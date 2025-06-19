@@ -24,10 +24,9 @@ const Header = () => {
   const navigation = [
     { name: 'Blog', href: '/blog' },
     { name: 'Poetry', href: '/poetry' },
-    { name: 'Parables', href: '/parables' },
+    { name: 'Prophecy', href: '/prophecy' },
     { name: 'Book Picks', href: '/book-picks' },
     { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
     { name: 'Store', href: '/store' },
   ];
 

@@ -1,7 +1,44 @@
 
-import { BookOpen, User } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, User, Mail } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const About = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    newsletter: false
+  });
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send the form data to your backend
+    toast({
+      title: "Message sent!",
+      description: "Thank you for reaching out. I'll get back to you soon.",
+    });
+    
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      subject: '',
+      message: '',
+      newsletter: false
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -32,9 +69,9 @@ const About = () => {
               
               <p className="text-lg leading-relaxed">
                 This corner of the internet serves as my watchtower—a place from which I observe the 
-                world with curiosity and wonder, then share what I see through words, poetry, and stories. 
+                world with curiosity and wonder, then share what I see through words, poetry, prophecy, and stories. 
                 Here, you'll find reflections on books that have shaped my thinking, poems that capture 
-                fleeting moments of beauty, and parables that offer gentle wisdom for the journey we're all on.
+                fleeting moments of beauty, and visions that offer gentle wisdom for the journey we're all on.
               </p>
             </div>
 
@@ -65,7 +102,7 @@ const About = () => {
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Personal reflections on life, literature, and meaning</li>
                   <li>• Poetry that captures fleeting moments of beauty</li>
-                  <li>• Modern parables offering gentle wisdom</li>
+                  <li>• Prophetic visions offering gentle wisdom</li>
                   <li>• Book recommendations that have shaped my thinking</li>
                   <li>• Thoughts on the art of slow living and mindful reading</li>
                 </ul>
@@ -82,22 +119,127 @@ const About = () => {
               </div>
             </div>
 
-            {/* Connect */}
-            <div className="text-center bg-card border border-warm-200 rounded-xl p-8">
-              <BookOpen className="h-8 w-8 text-warm-700 mx-auto mb-4" />
-              <h3 className="font-serif text-xl font-semibold text-primary mb-4">
-                Let's Stay Connected
-              </h3>
-              <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-                I'd love to hear from you. Whether you want to share your thoughts on something I've written, 
-                recommend a book, or simply say hello, I believe in the power of genuine conversation.
+            {/* Contact Section */}
+            <div className="bg-card border border-warm-200 rounded-xl p-8 md:p-12">
+              <div className="text-center mb-8">
+                <Mail className="h-10 w-10 text-warm-700 mx-auto mb-4" />
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-primary mb-4">
+                  Get in Touch
+                </h2>
+                <p className="text-muted-foreground max-w-lg mx-auto">
+                  I'd love to hear from you. Share your thoughts, ask questions, or simply say hello.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-warm-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-warm-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
+                    Subject
+                  </label>
+                  <select
+                    id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-warm-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                  >
+                    <option value="">Choose a topic</option>
+                    <option value="general">General inquiry</option>
+                    <option value="writing">About my writing</option>
+                    <option value="collaboration">Collaboration</option>
+                    <option value="book-recommendation">Book recommendation</option>
+                    <option value="newsletter">Newsletter subscription</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
+                    rows={6}
+                    className="w-full px-4 py-3 border border-warm-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-vertical"
+                    placeholder="Share your thoughts..."
+                  />
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="newsletter"
+                    name="newsletter"
+                    checked={formData.newsletter}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-primary border-warm-300 rounded focus:ring-primary"
+                  />
+                  <label htmlFor="newsletter" className="text-sm text-muted-foreground">
+                    Subscribe to my newsletter for new writings and reflections
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-warm-800 transition-colors duration-200 font-medium"
+                >
+                  Send Message
+                </button>
+              </form>
+            </div>
+
+            {/* Newsletter Signup */}
+            <div className="bg-warm-50 rounded-xl p-8 md:p-12 text-center">
+              <BookOpen className="h-10 w-10 text-warm-700 mx-auto mb-6" />
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-primary mb-4">
+                Join the Newsletter
+              </h2>
+              <p className="text-muted-foreground text-lg mb-6 max-w-lg mx-auto">
+                Receive new writings, poetry, and reflections delivered gently to your inbox. 
+                No spam, just meaningful content when inspiration strikes.
               </p>
-              <a 
-                href="/contact"
-                className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-warm-800 transition-colors duration-200 font-medium"
-              >
-                <span>Get in Touch</span>
-              </a>
+              <p className="text-sm text-muted-foreground">
+                Simply check the newsletter box in the form above, or mention it in your message.
+              </p>
             </div>
           </div>
         </div>
