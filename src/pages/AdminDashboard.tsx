@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,13 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const AdminDashboard = () => {
   const [newCategoryTitle, setNewCategoryTitle] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
-  const { toast } = useToast();
 
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
@@ -49,15 +47,35 @@ const AdminDashboard = () => {
   });
 
   const createCategory = async () => {
-    if (!newCategoryTitle.trim()) return;
+    if (!newCategoryTitle.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
     
     setCreatingCategory(true);
     try {
-      const slug = newCategoryTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      let slug = newCategoryTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      
+      // Ensure slug is not empty
+      if (!slug) {
+        slug = 'category-' + Date.now();
+      }
+
+      // Check if slug already exists
+      const { data: existingSection } = await supabase
+        .from('sections')
+        .select('id')
+        .eq('slug', slug)
+        .single();
+
+      if (existingSection) {
+        slug = slug + '-' + Date.now();
+      }
+
       const { error } = await supabase
         .from('sections')
         .insert([{
-          title: newCategoryTitle,
+          title: newCategoryTitle.trim(),
           slug,
           is_active: true,
           show_in_navigation: true,
@@ -68,18 +86,45 @@ const AdminDashboard = () => {
 
       setNewCategoryTitle('');
       refetchSections();
-      toast({
-        title: "Category created",
-        description: `${newCategoryTitle} has been added successfully.`,
-      });
+      toast.success(`Category "${newCategoryTitle}" created successfully!`);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Failed to create category",
-        description: error.message,
-      });
+      console.error('Category creation error:', error);
+      toast.error('Failed to create category: ' + (error.message || 'Unknown error'));
     } finally {
       setCreatingCategory(false);
+    }
+  };
+
+  const deleteCategory = async (sectionId: string, sectionTitle: string) => {
+    if (!confirm(`Are you sure you want to delete the "${sectionTitle}" category? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Check if there are any posts in this section
+      const { data: posts } = await supabase
+        .from('dynamic_posts')
+        .select('id')
+        .eq('section_id', sectionId)
+        .limit(1);
+
+      if (posts && posts.length > 0) {
+        toast.error('Cannot delete category that contains posts. Please move or delete all posts first.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('sections')
+        .delete()
+        .eq('id', sectionId);
+
+      if (error) throw error;
+
+      refetchSections();
+      toast.success(`Category "${sectionTitle}" deleted successfully!`);
+    } catch (error: any) {
+      console.error('Category deletion error:', error);
+      toast.error('Failed to delete category: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -119,19 +164,36 @@ const AdminDashboard = () => {
         <CardContent>
           <div className="flex gap-2 mb-4">
             <Input
-              placeholder="Category name"
+              placeholder="Category name (e.g., Technology, Health, Opinion)"
               value={newCategoryTitle}
               onChange={(e) => setNewCategoryTitle(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && createCategory()}
+              onKeyPress={(e) => e.key === 'Enter' && !creatingCategory && createCategory()}
+              className="flex-1"
             />
-            <Button onClick={createCategory} disabled={creatingCategory || !newCategoryTitle.trim()}>
+            <Button 
+              onClick={createCategory} 
+              disabled={creatingCategory || !newCategoryTitle.trim()}
+            >
               {creatingCategory ? 'Creating...' : 'Add Category'}
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {sections?.map(section => (
-              <div key={section.id} className="bg-secondary px-3 py-1 rounded-full text-sm">
-                {section.title}
+              <div key={section.id} className="bg-secondary px-4 py-3 rounded-lg flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{section.title}</div>
+                  <div className="text-sm text-muted-foreground">/{section.slug}</div>
+                </div>
+                {!['blog', 'poetry', 'prophecy', 'book-picks'].includes(section.slug) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteCategory(section.id, section.title)}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>

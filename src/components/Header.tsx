@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, Search, TrendingUp, Bookmark } from 'lucide-react';
+import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,11 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
+import SearchBar from './SearchBar';
 
 const Header = () => {
   const { user, signOut, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [penName, setPenName] = useState(localStorage.getItem('penName') || 'WordBasket');
+  const [penName, setPenName] = useState(localStorage.getItem('penName') || 'Anonymous Writer');
   const [isEditingPenName, setIsEditingPenName] = useState(false);
 
   const { data: sections } = useQuery({
@@ -40,8 +40,9 @@ const Header = () => {
   };
 
   const handlePenNameChange = (newName: string) => {
-    setPenName(newName);
-    localStorage.setItem('penName', newName);
+    const finalName = newName.trim() || 'Anonymous Writer';
+    setPenName(finalName);
+    localStorage.setItem('penName', finalName);
     setIsEditingPenName(false);
   };
 
@@ -62,8 +63,8 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Centered */}
-          <nav className="hidden lg:flex items-center space-x-10 flex-1 justify-center">
+          {/* Desktop Navigation - Better Spaced */}
+          <nav className="hidden lg:flex items-center space-x-12 flex-1 justify-center mx-8">
             {filteredSections.map((section) => (
               <Link
                 key={section.id}
@@ -94,17 +95,13 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Search Bar - Centered */}
-          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-8">
-            <Search className="absolute left-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search articles..."
-              className="pl-10 w-80 bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:border-blue-400"
-            />
+          {/* Search Bar - Longer and More Centered */}
+          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-12">
+            <SearchBar />
           </div>
 
-          {/* Auth Section */}
-          <div className="flex items-center space-x-6 flex-shrink-0">
+          {/* Auth Section - Better Spaced */}
+          <div className="flex items-center space-x-8 flex-shrink-0">
             {isAuthenticated ? (
               <>
                 {/* Write Button */}
@@ -116,6 +113,17 @@ const Header = () => {
                   >
                     <Edit className="h-4 w-4" />
                     Write
+                  </Button>
+                </Link>
+
+                {/* Drafts Button */}
+                <Link to="/drafts">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-blue-400 hover:bg-slate-700"
+                  >
+                    Drafts
                   </Button>
                 </Link>
 
@@ -145,17 +153,19 @@ const Header = () => {
                               handlePenNameChange(penName);
                             }
                             if (e.key === 'Escape') {
-                              setPenName(localStorage.getItem('penName') || 'WordBasket');
+                              setPenName(localStorage.getItem('penName') || 'Anonymous Writer');
                               setIsEditingPenName(false);
                             }
                           }}
-                          className="w-32 h-6 text-sm bg-slate-700 border-slate-600 text-white"
+                          className="w-36 h-6 text-sm bg-slate-700 border-slate-600 text-white"
                           autoFocus
+                          placeholder="Enter your pen name"
                         />
                       ) : (
                         <span 
-                          className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer font-medium"
+                          className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer font-medium min-w-0"
                           onClick={() => setIsEditingPenName(true)}
+                          title="Click to edit pen name"
                         >
                           {penName}
                         </span>
@@ -211,6 +221,14 @@ const Header = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/store" className="text-gray-300 hover:text-blue-400">Store</Link>
                 </DropdownMenuItem>
+                {isAuthenticated && (
+                  <>
+                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuItem asChild>
+                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400">Drafts</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

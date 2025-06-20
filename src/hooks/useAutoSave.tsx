@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface UseAutoSaveProps {
   postId?: string;
@@ -15,7 +15,6 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
   const [content, setContent] = useState(initialContent);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { toast } = useToast();
 
   const save = useCallback(async () => {
     if (!title.trim() || !sectionId) {
@@ -25,7 +24,12 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
     
     setSaving(true);
     try {
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      
+      // Ensure slug is not empty
+      if (!slug) {
+        slug = 'untitled-' + Date.now();
+      }
       
       if (postId) {
         // Update existing post
@@ -72,17 +76,13 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
       console.log('Post saved successfully');
     } catch (error: any) {
       console.error('Save failed:', error);
-      toast({
-        variant: "destructive",
-        title: "Save failed",
-        description: error.message || 'An error occurred while saving',
-      });
+      toast.error('Save failed: ' + (error.message || 'An error occurred while saving'));
     } finally {
       setSaving(false);
     }
-  }, [title, content, postId, sectionId, toast]);
+  }, [title, content, postId, sectionId]);
 
-  // Auto-save every 3 seconds when content changes
+  // Auto-save every 5 seconds when content changes
   useEffect(() => {
     if (!title.trim() || !sectionId) return;
     
@@ -90,7 +90,7 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
       if (title !== initialTitle || JSON.stringify(content) !== JSON.stringify(initialContent)) {
         save();
       }
-    }, 3000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [title, content, save, initialTitle, initialContent, sectionId]);
