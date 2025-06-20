@@ -6,8 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Save, Eye, EyeOff, Image as ImageIcon, Type, Bold, Italic, List, AlignLeft, Underline, Link } from 'lucide-react';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import TagsManager from './TagsManager';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import ReadingProgress from './ReadingProgress';
+import { Toggle } from '@/components/ui/toggle';
 
 interface MediumEditorProps {
   postId?: string;
@@ -43,27 +45,24 @@ const MediumEditor = ({
 
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [isPublished, setIsPublished] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState('');
+  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Categories available for selection
-  const categories = [
-    'Blog',
-    'Poetry', 
-    'Prophecy',
-    'Book Picks',
-    'Personal',
-    'Technology',
-    'Lifestyle',
-    'Travel',
-    'Food',
-    'Health',
-    'Business',
-    'Entertainment'
-  ];
+  // Fetch sections from dashboard
+  const { data: sections } = useQuery({
+    queryKey: ['sections'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('sections')
+        .select('*')
+        .eq('is_active', true)
+        .order('position');
+      return data || [];
+    },
+  });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,6 +95,19 @@ const MediumEditor = ({
     document.execCommand(command, false, value);
     contentRef.current?.focus();
     handleContentChange();
+    
+    // Update active formats
+    updateActiveFormats();
+  };
+
+  const updateActiveFormats = () => {
+    const formats = new Set<string>();
+    
+    if (document.queryCommandState('bold')) formats.add('bold');
+    if (document.queryCommandState('italic')) formats.add('italic');
+    if (document.queryCommandState('underline')) formats.add('underline');
+    
+    setActiveFormats(formats);
   };
 
   const insertLink = () => {
@@ -113,6 +125,18 @@ const MediumEditor = ({
     if (contentRef.current && !content.html) {
       contentRef.current.focus();
     }
+  }, []);
+
+  // Update active formats when selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      updateActiveFormats();
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
   }, []);
 
   return (
@@ -214,7 +238,7 @@ const MediumEditor = ({
               className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900" 
             />
 
-            {/* Category Selection */}
+            {/* Category Selection - Connected to Dashboard */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category
@@ -224,9 +248,9 @@ const MediumEditor = ({
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat.toLowerCase()}>
-                      {cat}
+                  {sections?.map((section) => (
+                    <SelectItem key={section.id} value={section.slug}>
+                      {section.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -246,48 +270,33 @@ const MediumEditor = ({
               />
             </div>
 
-            {/* Tags */}
-            <div className="mb-8">
-              <TagsManager 
-                tags={tags} 
-                onTagsChange={setTags} 
-                placeholder="Add tags to help readers discover your story..." 
-              />
-            </div>
-
-            {/* Enhanced Formatting Toolbar */}
+            {/* Enhanced Formatting Toolbar with Toggle States */}
             <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
               <div className="flex items-center gap-1 flex-wrap">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => formatText('bold')}
-                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                <Toggle
+                  pressed={activeFormats.has('bold')}
+                  onPressedChange={() => formatText('bold')}
+                  className="hover:bg-gray-200"
                   title="Bold (Ctrl+B)"
                 >
                   <Bold className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => formatText('italic')}
-                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                </Toggle>
+                <Toggle
+                  pressed={activeFormats.has('italic')}
+                  onPressedChange={() => formatText('italic')}
+                  className="hover:bg-gray-200"
                   title="Italic (Ctrl+I)"
                 >
                   <Italic className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => formatText('underline')}
-                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                </Toggle>
+                <Toggle
+                  pressed={activeFormats.has('underline')}
+                  onPressedChange={() => formatText('underline')}
+                  className="hover:bg-gray-200"
                   title="Underline (Ctrl+U)"
                 >
                   <Underline className="h-4 w-4" />
-                </Button>
+                </Toggle>
                 <div className="w-px h-6 bg-gray-300 mx-2"></div>
                 <Button
                   type="button"
@@ -354,7 +363,7 @@ const MediumEditor = ({
               </div>
             </div>
 
-            {/* Content Editor with proper styling and direction */}
+            {/* Content Editor with proper LTR direction */}
             <div className="relative">
               <div 
                 ref={contentRef} 
@@ -379,6 +388,7 @@ const MediumEditor = ({
                 dangerouslySetInnerHTML={{
                   __html: content.html || ''
                 }}
+                dir="ltr"
               />
               
               {(!content.html || content.html === '') && (
