@@ -16,6 +16,7 @@ import DynamicSection from "./pages/DynamicSection";
 import MediumEditor from "./components/MediumEditor";
 import Trending from "./pages/Trending";
 import Bookmarks from "./pages/Bookmarks";
+import Drafts from "./pages/Drafts";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/drafts" element={<Drafts />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/posts/new" element={
                 <MediumEditor 

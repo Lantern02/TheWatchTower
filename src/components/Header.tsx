@@ -52,59 +52,59 @@ const Header = () => {
 
   return (
     <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
-      <div className="section-container">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity flex-shrink-0">
             <BookOpen className="h-8 w-8 text-blue-400" />
             <span className="font-serif text-xl font-semibold text-white">
               TheWatchTower
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden lg:flex items-center space-x-10 flex-1 justify-center">
             {filteredSections.map((section) => (
               <Link
                 key={section.id}
                 to={`/${section.slug}`}
-                className="text-gray-300 hover:text-blue-400 transition-colors"
+                className="text-gray-300 hover:text-blue-400 transition-colors font-medium"
               >
                 {section.title}
               </Link>
             ))}
             <Link
               to="/trending"
-              className="text-gray-300 hover:text-blue-400 transition-colors flex items-center gap-1"
+              className="text-gray-300 hover:text-blue-400 transition-colors flex items-center gap-1 font-medium"
             >
               <TrendingUp className="h-4 w-4" />
               Trending
             </Link>
             <Link
               to="/about"
-              className="text-gray-300 hover:text-blue-400 transition-colors"
+              className="text-gray-300 hover:text-blue-400 transition-colors font-medium"
             >
               About
             </Link>
             <Link
               to="/store"
-              className="text-gray-300 hover:text-blue-400 transition-colors"
+              className="text-gray-300 hover:text-blue-400 transition-colors font-medium"
             >
               Store
             </Link>
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center relative">
+          {/* Search Bar - Centered */}
+          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-8">
             <Search className="absolute left-3 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search articles..."
-              className="pl-10 w-64 bg-slate-700 border-slate-600 text-white placeholder-gray-400"
+              className="pl-10 w-80 bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:border-blue-400"
             />
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6 flex-shrink-0">
             {isAuthenticated ? (
               <>
                 {/* Write Button */}
@@ -112,7 +112,7 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-gray-300 hover:text-blue-400 hover:bg-slate-700 flex items-center gap-1"
+                    className="text-gray-300 hover:text-blue-400 hover:bg-slate-700 flex items-center gap-2"
                   >
                     <Edit className="h-4 w-4" />
                     Write
@@ -133,8 +133,8 @@ const Header = () => {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                      <User className="h-4 w-4 text-gray-300" />
+                    <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                      <User className="h-5 w-5 text-gray-300" />
                       {isEditingPenName ? (
                         <Input
                           value={penName}
@@ -154,7 +154,7 @@ const Header = () => {
                         />
                       ) : (
                         <span 
-                          className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer"
+                          className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer font-medium"
                           onClick={() => setIsEditingPenName(true)}
                         >
                           {penName}
@@ -193,8 +193,8 @@ const Header = () => {
 
             {/* Mobile Menu */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="md:hidden">
-                <Menu className="h-4 w-4 text-gray-300" />
+              <DropdownMenuTrigger className="lg:hidden">
+                <Menu className="h-5 w-5 text-gray-300" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700">
                 {filteredSections.map((section) => (

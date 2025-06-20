@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Upload, Save, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import TagsManager from './TagsManager';
+import ReadingProgress from './ReadingProgress';
 
 interface MediumEditorProps {
   postId?: string;
@@ -35,6 +37,8 @@ const MediumEditor = ({
 
   const [coverImage, setCoverImage] = useState(initialCoverImage);
   const [isPublished, setIsPublished] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [excerpt, setExcerpt] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +66,9 @@ const MediumEditor = ({
     onPublish?.(newPublishState);
   };
 
+  // Calculate word count
+  const wordCount = content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).length : 0;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Fixed Header */}
@@ -71,6 +78,9 @@ const MediumEditor = ({
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">
                 {saving ? 'Saving...' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : 'Draft'}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {wordCount} words
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -93,6 +103,11 @@ const MediumEditor = ({
 
       {/* Editor Content */}
       <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Reading Progress */}
+        {content.html && (
+          <ReadingProgress content={content.html} />
+        )}
+
         {/* Cover Image */}
         <div className="mb-8">
           {coverImage ? (
@@ -139,6 +154,28 @@ const MediumEditor = ({
           placeholder="Title"
           className="text-5xl font-serif border-none p-0 mb-8 placeholder:text-muted-foreground/50 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px]"
         />
+
+        {/* Excerpt */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-muted-foreground mb-2">
+            Excerpt (Optional)
+          </label>
+          <Input
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            placeholder="Brief description of your article..."
+            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
+          />
+        </div>
+
+        {/* Tags */}
+        <div className="mb-8">
+          <TagsManager
+            tags={tags}
+            onTagsChange={setTags}
+            placeholder="Add tags to help readers find your article..."
+          />
+        </div>
 
         {/* Content Editor */}
         <div

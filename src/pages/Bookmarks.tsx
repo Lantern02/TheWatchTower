@@ -25,11 +25,10 @@ const Bookmarks = () => {
       if (bookmarks.length === 0) return [];
 
       const { data } = await supabase
-        .from('posts')
+        .from('dynamic_posts')
         .select(`
           *,
-          sections!inner(title, slug),
-          profiles!inner(full_name)
+          sections!inner(title, slug)
         `)
         .in('id', bookmarks)
         .eq('is_published', true);
@@ -129,12 +128,14 @@ const Bookmarks = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-300 mb-4 line-clamp-3">
-                {post.excerpt || post.content?.substring(0, 200) + '...'}
+                {post.excerpt || (typeof post.content === 'object' && post.content?.html ? 
+                  post.content.html.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 
+                  'No preview available')}
               </p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <User className="h-4 w-4" />
-                  <span>By {post.profiles?.full_name || 'Anonymous'}</span>
+                  <span>By Author</span>
                 </div>
                 <Link 
                   to={`/${post.sections?.slug}/${post.slug}`}

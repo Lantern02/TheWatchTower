@@ -12,14 +12,13 @@ const Trending = () => {
     queryKey: ['trending-posts'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('posts')
+        .from('dynamic_posts')
         .select(`
           *,
-          sections!inner(title, slug),
-          profiles!inner(full_name)
+          sections!inner(title, slug)
         `)
         .eq('is_published', true)
-        .order('created_at', { ascending: false })
+        .order('view_count', { ascending: false })
         .limit(10);
       return data || [];
     },
@@ -74,7 +73,7 @@ const Trending = () => {
                 <div className="flex items-center gap-4 text-sm text-gray-400">
                   <div className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    <span>{Math.floor(Math.random() * 1000 + 100)}</span>
+                    <span>{post.view_count || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -90,12 +89,14 @@ const Trending = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-300 mb-4 line-clamp-3">
-                {post.excerpt || post.content?.substring(0, 200) + '...'}
+                {post.excerpt || (typeof post.content === 'object' && post.content?.html ? 
+                  post.content.html.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 
+                  'No preview available')}
               </p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <User className="h-4 w-4" />
-                  <span>By {post.profiles?.full_name || 'Anonymous'}</span>
+                  <span>By Author</span>
                 </div>
                 <Link 
                   to={`/${post.sections?.slug}/${post.slug}`}
