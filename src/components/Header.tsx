@@ -22,6 +22,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [penName, setPenName] = useState(localStorage.getItem('penName') || 'Anonymous Writer');
   const [isEditingPenName, setIsEditingPenName] = useState(false);
+  const [tempPenName, setTempPenName] = useState(penName);
 
   const { data: sections } = useQuery({
     queryKey: ['nav-sections'],
@@ -55,11 +56,30 @@ const Header = () => {
     navigate('/');
   };
 
-  const handlePenNameChange = (newName: string) => {
-    const finalName = newName.trim() || 'Anonymous Writer';
+  const handlePenNameEdit = () => {
+    setTempPenName(penName);
+    setIsEditingPenName(true);
+  };
+
+  const handlePenNameSave = () => {
+    const finalName = tempPenName.trim() || 'Anonymous Writer';
     setPenName(finalName);
     localStorage.setItem('penName', finalName);
     setIsEditingPenName(false);
+  };
+
+  const handlePenNameCancel = () => {
+    setTempPenName(penName);
+    setIsEditingPenName(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handlePenNameSave();
+    }
+    if (e.key === 'Escape') {
+      handlePenNameCancel();
+    }
   };
 
   // Filter out poetry and prophecy sections
@@ -155,18 +175,10 @@ const Header = () => {
                       </Avatar>
                       {isEditingPenName ? (
                         <Input
-                          value={penName}
-                          onChange={(e) => setPenName(e.target.value)}
-                          onBlur={() => handlePenNameChange(penName)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handlePenNameChange(penName);
-                            }
-                            if (e.key === 'Escape') {
-                              setPenName(localStorage.getItem('penName') || 'Anonymous Writer');
-                              setIsEditingPenName(false);
-                            }
-                          }}
+                          value={tempPenName}
+                          onChange={(e) => setTempPenName(e.target.value)}
+                          onBlur={handlePenNameSave}
+                          onKeyDown={handleKeyDown}
                           className="w-36 h-6 text-sm bg-slate-700 border-slate-600 text-white"
                           autoFocus
                           placeholder="Enter your pen name"
@@ -174,7 +186,7 @@ const Header = () => {
                       ) : (
                         <span 
                           className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer font-medium min-w-0"
-                          onClick={() => setIsEditingPenName(true)}
+                          onClick={handlePenNameEdit}
                           title="Click to edit pen name"
                         >
                           {penName}
@@ -182,7 +194,7 @@ const Header = () => {
                       )}
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
+                  <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700 z-50">
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="text-gray-300 hover:text-blue-400">
                         <User className="mr-2 h-4 w-4" />
@@ -228,7 +240,7 @@ const Header = () => {
               <DropdownMenuTrigger className="lg:hidden">
                 <Menu className="h-5 w-5 text-gray-300" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700">
+              <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700 z-50">
                 {filteredSections.map((section) => (
                   <DropdownMenuItem key={section.id} asChild>
                     <Link to={`/${section.slug}`} className="text-gray-300 hover:text-blue-400">{section.title}</Link>
