@@ -60,22 +60,22 @@ they cannot see.`
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <section className="bg-gradient-to-br from-warm-50 to-warm-100 py-16">
-        <div className="section-container text-center">
-          <BookOpen className="h-12 w-12 text-warm-700 mx-auto mb-6" />
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-primary mb-4">
+      <section className="bg-gradient-to-br from-orange-50 to-orange-100 py-16">
+        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
+          <BookOpen className="h-12 w-12 text-orange-700 mx-auto mb-6" />
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
             Poetry
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Verses that capture the fleeting moments, the quiet observations, the sacred ordinary.
           </p>
         </div>
       </section>
 
       {/* Poems */}
-      <section className="section-container">
+      <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="max-w-2xl mx-auto space-y-16">
           {poems.map((poem, index) => (
             <article 
@@ -85,20 +85,20 @@ they cannot see.`
             >
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <h2 className="font-serif text-2xl md:text-3xl font-semibold text-primary">
+                  <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900">
                     {poem.title}
                   </h2>
-                  <time className="text-sm text-muted-foreground">{poem.date}</time>
+                  <time className="text-sm text-gray-500">{poem.date}</time>
                 </div>
                 
-                <div className="font-serif text-lg leading-relaxed text-foreground whitespace-pre-line max-w-lg mx-auto">
+                <div className="font-serif text-lg leading-relaxed text-gray-700 whitespace-pre-line max-w-lg mx-auto">
                   {poem.content}
                 </div>
               </div>
               
               {index < poems.length - 1 && (
                 <div className="mt-16 flex justify-center">
-                  <div className="w-16 h-px bg-warm-300"></div>
+                  <div className="w-16 h-px bg-orange-300"></div>
                 </div>
               )}
             </article>

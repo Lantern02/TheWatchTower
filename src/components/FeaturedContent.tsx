@@ -35,14 +35,14 @@ const FeaturedContent = () => {
   ];
 
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="font-serif text-4xl md:text-5xl font-semibold text-primary mb-6">
+          <h2 className="font-serif text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
             Recent Reflections
           </h2>
-          <p className="text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-600 text-xl max-w-2xl mx-auto leading-relaxed">
             New writings, poetry, and contemplations from the watchtower of daily life.
           </p>
         </div>
@@ -64,13 +64,13 @@ const FeaturedContent = () => {
                   />
                 </div>
                 <div className="space-y-4">
-                  <span className="text-sm font-semibold text-warm-700 uppercase tracking-wider">
+                  <span className="text-sm font-semibold text-orange-700 uppercase tracking-wider">
                     {post.category}
                   </span>
-                  <h3 className="font-serif text-2xl font-semibold text-primary group-hover:text-warm-700 transition-colors duration-300">
+                  <h3 className="font-serif text-2xl font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-300">
                     {post.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
+                  <p className="text-gray-600 leading-relaxed text-lg">
                     {post.excerpt}
                   </p>
                 </div>

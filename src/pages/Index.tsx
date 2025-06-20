@@ -6,7 +6,7 @@ import NewsletterPopup from '@/components/NewsletterPopup';
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Hero />
       <FeaturedContent />
       <NewsletterSignup />
