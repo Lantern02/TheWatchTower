@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { BookOpen, User, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -62,18 +63,26 @@ const About = () => {
           <div className="max-w-3xl mx-auto">
             <div className="space-y-12">
               {/* Main Bio */}
-              <ContentEditor
-                page="about"
-                sectionKey="main-bio"
-                title="Main Bio"
-                defaultContent={`Welcome to TheWatchTower, a space born from a simple belief: that in our hurried world, we need places to pause, reflect, and remember what matters most. I am a collector of quiet moments, a student of human nature, and someone who finds profound meaning in the ordinary details of daily life.
+              <div>
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
+                  My Story
+                </h2>
+                <ContentEditor
+                  page="about"
+                  sectionKey="main-bio"
+                  title="Main Bio"
+                  defaultContent={`Welcome to TheWatchTower, a space born from a simple belief: that in our hurried world, we need places to pause, reflect, and remember what matters most. I am a collector of quiet moments, a student of human nature, and someone who finds profound meaning in the ordinary details of daily life.
 
 This corner of the internet serves as my watchtower—a place from which I observe the world with curiosity and wonder, then share what I see through words, poetry, prophecy, and stories. Here, you'll find reflections on books that have shaped my thinking, poems that capture fleeting moments of beauty, and visions that offer gentle wisdom for the journey we're all on.`}
-                className="space-y-6"
-              />
+                  className="space-y-6"
+                />
+              </div>
 
               {/* Philosophy */}
               <div className="bg-orange-50 rounded-xl p-8 md:p-12">
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
+                  My Writing Philosophy
+                </h2>
                 <ContentEditor
                   page="about"
                   sectionKey="philosophy"
@@ -86,23 +95,33 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
 
               {/* What You'll Find */}
               <div className="grid md:grid-cols-2 gap-8">
-                <ContentEditor
-                  page="about"
-                  sectionKey="what-youll-find"
-                  title="What You'll Find Here"
-                  defaultContent={`• Personal reflections on life, literature, and meaning
+                <div>
+                  <h3 className="font-serif text-xl font-semibold text-gray-900 mb-4">
+                    What You'll Find Here
+                  </h3>
+                  <ContentEditor
+                    page="about"
+                    sectionKey="what-youll-find"
+                    title="What You'll Find Here"
+                    defaultContent={`• Personal reflections on life, literature, and meaning
 • Poetry that captures fleeting moments of beauty
 • Prophetic visions offering gentle wisdom
 • Book recommendations that have shaped my thinking
 • Thoughts on the art of slow living and mindful reading`}
-                />
+                  />
+                </div>
                 
-                <ContentEditor
-                  page="about"
-                  sectionKey="hope-for-you"
-                  title="My Hope for You"
-                  defaultContent="My hope is that something here resonates with you—whether it's a line of poetry that captures how you're feeling, a reflection that offers a new perspective, or simply the reminder that you're not alone in finding meaning in the small, sacred moments of everyday life."
-                />
+                <div>
+                  <h3 className="font-serif text-xl font-semibold text-gray-900 mb-4">
+                    My Hope for You
+                  </h3>
+                  <ContentEditor
+                    page="about"
+                    sectionKey="hope-for-you"
+                    title="My Hope for You"
+                    defaultContent="My hope is that something here resonates with you—whether it's a line of poetry that captures how you're feeling, a reflection that offers a new perspective, or simply the reminder that you're not alone in finding meaning in the small, sacred moments of everyday life."
+                  />
+                </div>
               </div>
 
               {/* Contact Section */}
@@ -217,6 +236,9 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
               {/* Newsletter Signup */}
               <div className="bg-orange-50 rounded-xl p-8 md:p-12 text-center">
                 <BookOpen className="h-10 w-10 text-orange-700 mx-auto mb-6" />
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+                  Join the Newsletter
+                </h2>
                 <ContentEditor
                   page="about"
                   sectionKey="newsletter"

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
+import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import SearchBar from './SearchBar';
@@ -56,11 +63,6 @@ const Header = () => {
     navigate('/');
   };
 
-  const handlePenNameEdit = () => {
-    setTempPenName(penName);
-    setIsEditingPenName(true);
-  };
-
   const handlePenNameSave = () => {
     const finalName = tempPenName.trim() || 'Anonymous Writer';
     setPenName(finalName);
@@ -71,15 +73,6 @@ const Header = () => {
   const handlePenNameCancel = () => {
     setTempPenName(penName);
     setIsEditingPenName(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handlePenNameSave();
-    }
-    if (e.key === 'Escape') {
-      handlePenNameCancel();
-    }
   };
 
   // Filter out poetry and prophecy sections
@@ -99,8 +92,8 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Better Spaced */}
-          <nav className="hidden lg:flex items-center space-x-12 flex-1 justify-center mx-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center mx-8">
             {filteredSections.map((section) => (
               <Link
                 key={section.id}
@@ -131,13 +124,13 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Search Bar - Longer and More Centered */}
-          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-12">
+          {/* Search Bar */}
+          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-8">
             <SearchBar />
           </div>
 
-          {/* Auth Section - Better Spaced */}
-          <div className="flex items-center space-x-8 flex-shrink-0">
+          {/* Auth Section */}
+          <div className="flex items-center space-x-6 flex-shrink-0">
             {isAuthenticated ? (
               <>
                 {/* Write Button */}
@@ -173,28 +166,46 @@ const Header = () => {
                           {penName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      {isEditingPenName ? (
-                        <Input
-                          value={tempPenName}
-                          onChange={(e) => setTempPenName(e.target.value)}
-                          onBlur={handlePenNameSave}
-                          onKeyDown={handleKeyDown}
-                          className="w-36 h-6 text-sm bg-slate-700 border-slate-600 text-white"
-                          autoFocus
-                          placeholder="Enter your pen name"
-                        />
-                      ) : (
-                        <span 
-                          className="hidden sm:inline text-white hover:text-blue-400 cursor-pointer font-medium min-w-0"
-                          onClick={handlePenNameEdit}
-                          title="Click to edit pen name"
-                        >
-                          {penName}
-                        </span>
-                      )}
+                      <span className="hidden sm:inline text-white font-medium min-w-0">
+                        {penName}
+                      </span>
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700 z-50">
+                    <Dialog open={isEditingPenName} onOpenChange={setIsEditingPenName}>
+                      <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Pen Name
+                        </DropdownMenuItem>
+                      </DialogTrigger>
+                      <DialogContent className="bg-slate-800 border-slate-700 text-white">
+                        <DialogHeader>
+                          <DialogTitle>Edit Your Pen Name</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            value={tempPenName}
+                            onChange={(e) => setTempPenName(e.target.value)}
+                            placeholder="Enter your pen name"
+                            className="bg-slate-700 border-slate-600 text-white"
+                            autoFocus
+                          />
+                          <div className="flex justify-end space-x-2">
+                            <Button 
+                              variant="outline" 
+                              onClick={handlePenNameCancel}
+                              className="border-slate-600 text-white hover:bg-slate-700"
+                            >
+                              Cancel
+                            </Button>
+                            <Button onClick={handlePenNameSave} className="bg-blue-600 hover:bg-blue-700">
+                              Save
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="text-gray-300 hover:text-blue-400">
                         <User className="mr-2 h-4 w-4" />

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { User, Camera, Save, Mail } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { User, Camera, Save, Mail, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +14,7 @@ const Profile = () => {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,6 +22,7 @@ const Profile = () => {
     bio: '',
     avatar_url: ''
   });
+  const [uploading, setUploading] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -50,6 +52,38 @@ const Profile = () => {
       });
     }
   }, [profile]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    setUploading(true);
+    try {
+      // Convert file to base64 for temporary preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          avatar_url: e.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: "Image uploaded",
+        description: "Your profile picture has been updated temporarily. Save to make it permanent.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Upload error:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -135,30 +169,56 @@ const Profile = () => {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Avatar Section */}
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={formData.avatar_url} alt={penName} />
-                <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl">
-                  {penName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={formData.avatar_url} alt={penName} />
+                  <AvatarFallback className="bg-orange-100 text-orange-700 text-4xl">
+                    {penName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {isEditing && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="absolute -bottom-2 -right-2 rounded-full h-10 w-10 p-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
               
               {isEditing && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-900">
-                    Avatar URL
-                  </label>
-                  <Input
-                    type="url"
-                    value={formData.avatar_url}
-                    onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                    placeholder="https://example.com/your-photo.jpg"
-                    className="w-80"
-                  />
+                <div className="text-center space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {uploading ? 'Uploading...' : 'Upload New Photo'}
+                  </Button>
                   <p className="text-sm text-gray-500">
-                    Enter a URL to your profile picture
+                    Click to upload a new profile picture
                   </p>
                 </div>
               )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
             </div>
 
             {/* Basic Info */}
@@ -189,7 +249,7 @@ const Profile = () => {
                   {penName}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Edit your pen name by clicking on it in the header
+                  Edit your pen name using the dialog in the header menu
                 </p>
               </div>
             </div>
