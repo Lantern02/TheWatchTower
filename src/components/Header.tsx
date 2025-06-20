@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
@@ -167,12 +166,6 @@ const Header = () => {
                       <Link to="/admin" className="text-gray-300 hover:text-blue-400">
                         <Settings className="mr-2 h-4 w-4" />
                         Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400">
-                        <FileText className="mr-2 h-4 w-4" />
-                        My Drafts
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
