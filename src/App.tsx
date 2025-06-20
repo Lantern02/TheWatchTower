@@ -18,6 +18,7 @@ import MediumEditor from "./components/MediumEditor";
 import Trending from "./pages/Trending";
 import Bookmarks from "./pages/Bookmarks";
 import Drafts from "./pages/Drafts";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,11 @@ const App = () => (
               <Route path="/store" element={<Store />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/trending" element={<Trending />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
               <Route path="/bookmarks" element={
                 <ProtectedRoute>
                   <Bookmarks />

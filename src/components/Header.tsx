@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
@@ -14,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import SearchBar from './SearchBar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Header = () => {
   const { user, signOut, isAuthenticated } = useAuth();
@@ -32,6 +34,20 @@ const Header = () => {
         .order('position');
       return data || [];
     },
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const handleSignOut = async () => {
@@ -131,7 +147,12 @@ const Header = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-                      <User className="h-5 w-5 text-gray-300" />
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile?.avatar_url || ''} alt={penName} />
+                        <AvatarFallback className="bg-slate-700 text-white">
+                          {penName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       {isEditingPenName ? (
                         <Input
                           value={penName}
@@ -163,9 +184,21 @@ const Header = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
                     <DropdownMenuItem asChild>
+                      <Link to="/profile" className="text-gray-300 hover:text-blue-400">
+                        <User className="mr-2 h-4 w-4" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/admin" className="text-gray-300 hover:text-blue-400">
                         <Settings className="mr-2 h-4 w-4" />
                         Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400">
+                        <FileText className="mr-2 h-4 w-4" />
+                        My Drafts
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
