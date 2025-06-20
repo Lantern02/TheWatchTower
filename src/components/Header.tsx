@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark } from 'lucide-react';
+import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -116,17 +117,6 @@ const Header = () => {
                   </Button>
                 </Link>
 
-                {/* Drafts Button */}
-                <Link to="/drafts">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-300 hover:text-blue-400 hover:bg-slate-700"
-                  >
-                    Drafts
-                  </Button>
-                </Link>
-
                 {/* Notification Bell */}
                 <Button
                   variant="ghost"
@@ -180,6 +170,12 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400">
+                        <FileText className="mr-2 h-4 w-4" />
+                        My Drafts
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/bookmarks" className="text-gray-300 hover:text-blue-400">
                         <Bookmark className="mr-2 h-4 w-4" />
                         Bookmarks
@@ -221,14 +217,6 @@ const Header = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/store" className="text-gray-300 hover:text-blue-400">Store</Link>
                 </DropdownMenuItem>
-                {isAuthenticated && (
-                  <>
-                    <DropdownMenuSeparator className="bg-slate-700" />
-                    <DropdownMenuItem asChild>
-                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400">Drafts</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Store from "./pages/Store";
@@ -35,19 +36,35 @@ const App = () => (
               <Route path="/store" element={<Store />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/trending" element={<Trending />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
-              <Route path="/drafts" element={<Drafts />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/bookmarks" element={
+                <ProtectedRoute>
+                  <Bookmarks />
+                </ProtectedRoute>
+              } />
+              <Route path="/drafts" element={
+                <ProtectedRoute>
+                  <Drafts />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/admin/posts/new" element={
-                <MediumEditor 
-                  sectionId={new URLSearchParams(window.location.search).get('section') || ''} 
-                />
+                <ProtectedRoute>
+                  <MediumEditor 
+                    sectionId={new URLSearchParams(window.location.search).get('section') || ''} 
+                  />
+                </ProtectedRoute>
               } />
               <Route path="/admin/posts/:postId" element={
-                <MediumEditor 
-                  postId={window.location.pathname.split('/').pop()} 
-                  sectionId=""
-                />
+                <ProtectedRoute>
+                  <MediumEditor 
+                    postId={window.location.pathname.split('/').pop()} 
+                    sectionId=""
+                  />
+                </ProtectedRoute>
               } />
               <Route path="/:slug" element={<DynamicSection />} />
               <Route path="*" element={<NotFound />} />
