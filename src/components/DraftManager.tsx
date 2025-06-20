@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Draft {
   id: string;
@@ -13,27 +16,92 @@ interface Draft {
   lastModified: Date;
   wordCount: number;
   status: 'draft' | 'published';
+  sectionTitle?: string;
 }
 
 const DraftManager = () => {
-  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [localDrafts, setLocalDrafts] = useState<Draft[]>([]);
+
+  // Fetch drafts from database
+  const { data: dbDrafts, refetch } = useQuery({
+    queryKey: ['drafts'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('dynamic_posts')
+        .select(`
+          *,
+          sections(title)
+        `)
+        .order('updated_at', { ascending: false });
+      return data || [];
+    },
+  });
 
   useEffect(() => {
-    // Load drafts from localStorage
+    // Load local drafts from localStorage
     const savedDrafts = localStorage.getItem('drafts');
     if (savedDrafts) {
       const parsedDrafts = JSON.parse(savedDrafts).map((draft: any) => ({
         ...draft,
         lastModified: new Date(draft.lastModified)
       }));
-      setDrafts(parsedDrafts);
+      setLocalDrafts(parsedDrafts);
     }
   }, []);
 
-  const deleteDraft = (id: string) => {
-    const updatedDrafts = drafts.filter(draft => draft.id !== id);
-    setDrafts(updatedDrafts);
-    localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
+  // Combine and deduplicate drafts from database and localStorage
+  const allDrafts = React.useMemo(() => {
+    const combined: Draft[] = [];
+    
+    // Add database drafts
+    if (dbDrafts) {
+      dbDrafts.forEach(post => {
+        const contentText = typeof post.content === 'object' && post.content?.html 
+          ? post.content.html.replace(/<[^>]*>/g, '') 
+          : '';
+        
+        combined.push({
+          id: post.id,
+          title: post.title,
+          content: contentText,
+          lastModified: new Date(post.updated_at),
+          wordCount: contentText.split(/\s+/).filter(word => word.length > 0).length,
+          status: post.is_published ? 'published' : 'draft',
+          sectionTitle: post.sections?.title
+        });
+      });
+    }
+    
+    // Add local drafts that aren't in database
+    localDrafts.forEach(localDraft => {
+      if (!combined.find(d => d.id === localDraft.id)) {
+        combined.push(localDraft);
+      }
+    });
+    
+    return combined.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
+  }, [dbDrafts, localDrafts]);
+
+  const deleteDraft = async (id: string) => {
+    try {
+      // Try to delete from database first
+      const { error } = await supabase
+        .from('dynamic_posts')
+        .delete()
+        .eq('id', id);
+      
+      if (!error) {
+        refetch();
+        toast.success('Draft deleted successfully');
+      }
+    } catch (error) {
+      console.log('Not in database, removing from localStorage');
+    }
+    
+    // Remove from localStorage
+    const updatedLocalDrafts = localDrafts.filter(draft => draft.id !== id);
+    setLocalDrafts(updatedLocalDrafts);
+    localStorage.setItem('drafts', JSON.stringify(updatedLocalDrafts));
   };
 
   const formatTimeAgo = (date: Date) => {
@@ -60,7 +128,7 @@ const DraftManager = () => {
         </Link>
       </div>
 
-      {drafts.length === 0 ? (
+      {allDrafts.length === 0 ? (
         <Card className="bg-slate-800 border-slate-700">
           <CardContent className="p-8 text-center">
             <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
@@ -74,7 +142,7 @@ const DraftManager = () => {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {drafts.map((draft) => (
+          {allDrafts.map((draft) => (
             <Card key={draft.id} className="bg-slate-800 border-slate-700 hover:border-blue-400 transition-colors">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -94,6 +162,11 @@ const DraftManager = () => {
                       >
                         {draft.status}
                       </Badge>
+                      {draft.sectionTitle && (
+                        <Badge variant="outline" className="border-slate-600 text-gray-300">
+                          {draft.sectionTitle}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

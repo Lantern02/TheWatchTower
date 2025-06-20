@@ -15,10 +15,11 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
   const [content, setContent] = useState(initialContent);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [currentPostId, setCurrentPostId] = useState(postId);
 
   const save = useCallback(async () => {
-    if (!title.trim() || !sectionId) {
-      console.log('Cannot save: missing title or sectionId');
+    if (!title.trim()) {
+      console.log('Cannot save: missing title');
       return;
     }
     
@@ -31,7 +32,7 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
         slug = 'untitled-' + Date.now();
       }
       
-      if (postId) {
+      if (currentPostId) {
         // Update existing post
         const { error } = await supabase
           .from('dynamic_posts')
@@ -39,20 +40,21 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
             title,
             content,
             slug,
+            section_id: content.category || sectionId,
             updated_at: new Date().toISOString()
           })
-          .eq('id', postId);
+          .eq('id', currentPostId);
           
         if (error) {
           console.error('Update error:', error);
           throw error;
         }
       } else {
-        // Create new post
+        // Create new post as draft
         const { data, error } = await supabase
           .from('dynamic_posts')
           .insert([{
-            section_id: sectionId,
+            section_id: content.category || sectionId,
             title,
             content,
             slug,
@@ -66,25 +68,48 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
           throw error;
         }
         
-        // Update URL to include new post ID
+        // Update current post ID and URL
         if (data) {
+          setCurrentPostId(data.id);
           window.history.replaceState({}, '', `/admin/posts/${data.id}`);
         }
       }
       
       setLastSaved(new Date());
       console.log('Post saved successfully');
+
+      // Also save to localStorage as backup
+      const draftData = {
+        id: currentPostId || 'temp-' + Date.now(),
+        title,
+        content: content.html || '',
+        lastModified: new Date(),
+        wordCount: content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter((word: string) => word.length > 0).length : 0,
+        status: 'draft' as const
+      };
+
+      const existingDrafts = JSON.parse(localStorage.getItem('drafts') || '[]');
+      const draftIndex = existingDrafts.findIndex((draft: any) => draft.id === draftData.id);
+      
+      if (draftIndex >= 0) {
+        existingDrafts[draftIndex] = draftData;
+      } else {
+        existingDrafts.push(draftData);
+      }
+      
+      localStorage.setItem('drafts', JSON.stringify(existingDrafts));
+      
     } catch (error: any) {
       console.error('Save failed:', error);
       toast.error('Save failed: ' + (error.message || 'An error occurred while saving'));
     } finally {
       setSaving(false);
     }
-  }, [title, content, postId, sectionId]);
+  }, [title, content, currentPostId, sectionId]);
 
   // Auto-save every 5 seconds when content changes
   useEffect(() => {
-    if (!title.trim() || !sectionId) return;
+    if (!title.trim()) return;
     
     const timer = setTimeout(() => {
       if (title !== initialTitle || JSON.stringify(content) !== JSON.stringify(initialContent)) {
@@ -93,7 +118,7 @@ export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialConte
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [title, content, save, initialTitle, initialContent, sectionId]);
+  }, [title, content, save, initialTitle, initialContent]);
 
   return {
     title,

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText, Camera } from 'lucide-react';
+import { Book Open, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import SearchBar from './SearchBar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 const Header = () => {
   const { user, signOut, isAuthenticated } = useAuth();
@@ -61,6 +62,7 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+    toast.success('Logged out successfully');
   };
 
   const handlePenNameSave = () => {
@@ -68,6 +70,7 @@ const Header = () => {
     setPenName(finalName);
     localStorage.setItem('penName', finalName);
     setIsEditingPenName(false);
+    toast.success('Pen name updated successfully');
   };
 
   const handlePenNameCancel = () => {
@@ -144,6 +147,17 @@ const Header = () => {
                     Write
                   </Button>
                 </Link>
+
+                {/* Logout Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-gray-300 hover:text-red-400 hover:bg-slate-700 flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
 
                 {/* Notification Bell */}
                 <Button
@@ -231,7 +245,7 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-slate-700" />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-gray-300 hover:text-blue-400">
+                    <DropdownMenuItem onClick={handleSignOut} className="text-gray-300 hover:text-red-400">
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
                     </DropdownMenuItem>

@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Save, Eye, EyeOff, Image as ImageIcon, Type, Bold, Italic, List, AlignLeft, Underline, Link } from 'lucide-react';
+import { Upload, Save, Eye, EyeOff, Image as ImageIcon, Type, Bold, Italic, List, AlignLeft, Underline, Link, LogOut } from 'lucide-react';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ReadingProgress from './ReadingProgress';
 import { Toggle } from '@/components/ui/toggle';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface MediumEditorProps {
   postId?: string;
@@ -28,6 +31,8 @@ const MediumEditor = ({
   initialCoverImage = '',
   onPublish
 }: MediumEditorProps) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const {
     title,
     setTitle,
@@ -64,6 +69,12 @@ const MediumEditor = ({
     },
   });
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+    toast.success('Logged out successfully');
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -86,9 +97,43 @@ const MediumEditor = ({
   };
 
   const togglePublish = async () => {
-    const newPublishState = !isPublished;
-    setIsPublished(newPublishState);
-    onPublish?.(newPublishState);
+    if (!title.trim()) {
+      toast.error('Please add a title before publishing');
+      return;
+    }
+    
+    if (!category) {
+      toast.error('Please select a category before publishing');
+      return;
+    }
+
+    try {
+      const newPublishState = !isPublished;
+      
+      // First save the post
+      await save();
+      
+      // Then update the published status
+      if (postId) {
+        const { error } = await supabase
+          .from('dynamic_posts')
+          .update({ 
+            is_published: newPublishState,
+            section_id: category,
+            excerpt: excerpt || content.html?.replace(/<[^>]*>/g, '').substring(0, 200)
+          })
+          .eq('id', postId);
+          
+        if (error) throw error;
+        
+        setIsPublished(newPublishState);
+        onPublish?.(newPublishState);
+        
+        toast.success(newPublishState ? 'Post published successfully!' : 'Post unpublished');
+      }
+    } catch (error: any) {
+      toast.error('Failed to publish post: ' + error.message);
+    }
   };
 
   const formatText = (command: string, value?: string) => {
@@ -139,6 +184,16 @@ const MediumEditor = ({
     };
   }, []);
 
+  // Update category when it changes
+  useEffect(() => {
+    if (category) {
+      setContent(prev => ({
+        ...prev,
+        category: category
+      }));
+    }
+  }, [category, setContent]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed Header */}
@@ -165,6 +220,10 @@ const MediumEditor = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
               <Button variant="outline" size="sm" onClick={save} disabled={saving}>
                 <Save className="h-4 w-4 mr-2" />
                 Save
@@ -241,7 +300,7 @@ const MediumEditor = ({
             {/* Category Selection - Connected to Dashboard */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
+                Category *
               </label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-full max-w-xs bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
@@ -249,7 +308,7 @@ const MediumEditor = ({
                 </SelectTrigger>
                 <SelectContent>
                   {sections?.map((section) => (
-                    <SelectItem key={section.id} value={section.slug}>
+                    <SelectItem key={section.id} value={section.id}>
                       {section.title}
                     </SelectItem>
                   ))}
@@ -363,7 +422,7 @@ const MediumEditor = ({
               </div>
             </div>
 
-            {/* Content Editor with proper LTR direction */}
+            {/* Content Editor with proper LTR direction and fixed writing */}
             <div className="relative">
               <div 
                 ref={contentRef} 
@@ -383,7 +442,8 @@ const MediumEditor = ({
                   letterSpacing: '-0.003em',
                   direction: 'ltr',
                   textAlign: 'left',
-                  unicodeBidi: 'normal'
+                  unicodeBidi: 'embed',
+                  writingMode: 'horizontal-tb'
                 }}
                 dangerouslySetInnerHTML={{
                   __html: content.html || ''
