@@ -125,6 +125,36 @@ export type Database = {
         }
         Relationships: []
       }
+      page_content: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          key: string
+          page: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          key: string
+          page: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          key?: string
+          page?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_analytics: {
         Row: {
           created_at: string
