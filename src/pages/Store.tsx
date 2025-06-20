@@ -1,9 +1,6 @@
-
 import { BookOpen } from 'lucide-react';
-
 const Store = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <section className="bg-gradient-to-br from-warm-50 to-warm-100 py-16">
         <div className="section-container text-center">
@@ -42,9 +39,11 @@ const Store = () => {
                   <h3 className="font-serif text-xl font-semibold text-primary">What's Coming</h3>
                   <ul className="space-y-2 text-muted-foreground">
                     <li>• Poetry collections in beautifully designed formats</li>
-                    <li>• Reflection journals with guided prompts</li>
+                    <li>
+                  </li>
                     <li>• Digital and print versions of my writings</li>
-                    <li>• Limited edition handcrafted items</li>
+                    <li>
+                  </li>
                   </ul>
                 </div>
                 
@@ -58,10 +57,7 @@ const Store = () => {
               </div>
 
               <div className="pt-6">
-                <a 
-                  href="/contact"
-                  className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-warm-800 transition-colors duration-200 font-medium"
-                >
+                <a href="/contact" className="inline-flex items-center space-x-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-warm-800 transition-colors duration-200 font-medium">
                   <span>Join the Newsletter</span>
                 </a>
               </div>
@@ -74,8 +70,6 @@ const Store = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Store;
