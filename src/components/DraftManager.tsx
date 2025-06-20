@@ -56,9 +56,15 @@ const DraftManager = () => {
     // Add database drafts
     if (dbDrafts) {
       dbDrafts.forEach(post => {
-        const contentText = typeof post.content === 'object' && post.content?.html 
-          ? post.content.html.replace(/<[^>]*>/g, '') 
-          : '';
+        let contentText = '';
+        
+        // Safely extract text content from JSONB
+        if (post.content && typeof post.content === 'object' && !Array.isArray(post.content)) {
+          const contentObj = post.content as { html?: string };
+          if (contentObj.html) {
+            contentText = contentObj.html.replace(/<[^>]*>/g, '');
+          }
+        }
         
         combined.push({
           id: post.id,
