@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book Open, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
+import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
