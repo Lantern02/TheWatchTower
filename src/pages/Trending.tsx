@@ -45,6 +45,16 @@ const Trending = () => {
     );
   }
 
+  const getPostPreview = (post: any) => {
+    if (post.excerpt) return post.excerpt;
+    
+    if (post.content && typeof post.content === 'object' && !Array.isArray(post.content) && post.content.html) {
+      return post.content.html.replace(/<[^>]*>/g, '').substring(0, 200) + '...';
+    }
+    
+    return 'No preview available';
+  };
+
   return (
     <div className="section-container">
       <div className="text-center mb-12">
@@ -89,9 +99,7 @@ const Trending = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-300 mb-4 line-clamp-3">
-                {post.excerpt || (typeof post.content === 'object' && post.content?.html ? 
-                  post.content.html.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 
-                  'No preview available')}
+                {getPostPreview(post)}
               </p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-gray-400">
