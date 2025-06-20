@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus, Trash2 } from 'lucide-react';
+import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus, Trash2, FileText, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminDashboard = () => {
@@ -46,6 +46,17 @@ const AdminDashboard = () => {
     },
   });
 
+  const { data: pageContent } = useQuery({
+    queryKey: ['page-content-admin'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('page_content')
+        .select('*')
+        .order('page, key');
+      return data || [];
+    },
+  });
+
   const createCategory = async () => {
     if (!newCategoryTitle.trim()) {
       toast.error('Please enter a category name');
@@ -56,12 +67,10 @@ const AdminDashboard = () => {
     try {
       let slug = newCategoryTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       
-      // Ensure slug is not empty
       if (!slug) {
         slug = 'category-' + Date.now();
       }
 
-      // Check if slug already exists
       const { data: existingSection } = await supabase
         .from('sections')
         .select('id')
@@ -101,7 +110,6 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Check if there are any posts in this section
       const { data: posts } = await supabase
         .from('dynamic_posts')
         .select('id')
@@ -151,6 +159,48 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
+
+      {/* Content Management */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Page Content Management
+          </CardTitle>
+          <CardDescription>Edit content sections across your website</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link to="/about" className="block">
+              <div className="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg border transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-orange-900">About Page</h3>
+                  <Edit className="h-4 w-4 text-orange-600" />
+                </div>
+                <p className="text-sm text-orange-700">
+                  {pageContent?.filter(c => c.page === 'about').length || 0} editable sections
+                </p>
+              </div>
+            </Link>
+            
+            <div className="bg-gray-50 p-4 rounded-lg border opacity-50">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium text-gray-600">Home Page</h3>
+                <Edit className="h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500">Coming soon</p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg border opacity-50">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium text-gray-600">Other Pages</h3>
+                <Edit className="h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500">Coming soon</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Category Management */}
       <Card className="mb-8">

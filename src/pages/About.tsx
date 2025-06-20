@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { BookOpen, User, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ContentEditor from '@/components/ContentEditor';
 
 const About = () => {
   const [formData, setFormData] = useState({
@@ -43,12 +43,13 @@ const About = () => {
       <section className="bg-gradient-to-br from-orange-50 to-orange-100 py-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <User className="h-12 w-12 text-orange-700 mx-auto mb-6" />
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
-            About Me
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            A keeper of words, a seeker of quiet wisdom, and a believer in the power of stories to transform hearts.
-          </p>
+          <ContentEditor
+            page="about"
+            sectionKey="header"
+            title="About Me"
+            defaultContent="A keeper of words, a seeker of quiet wisdom, and a believer in the power of stories to transform hearts."
+            className="text-center"
+          />
         </div>
       </section>
 
@@ -57,67 +58,50 @@ const About = () => {
         <div className="max-w-3xl mx-auto">
           <div className="space-y-12">
             {/* Main Bio */}
-            <div className="space-y-6">
-              <p className="text-lg leading-relaxed text-gray-700">
-                Welcome to TheWatchTower, a space born from a simple belief: that in our hurried world, 
-                we need places to pause, reflect, and remember what matters most. I am a collector of 
-                quiet moments, a student of human nature, and someone who finds profound meaning in the 
-                ordinary details of daily life.
-              </p>
-              
-              <p className="text-lg leading-relaxed text-gray-700">
-                This corner of the internet serves as my watchtower—a place from which I observe the 
-                world with curiosity and wonder, then share what I see through words, poetry, prophecy, and stories. 
-                Here, you'll find reflections on books that have shaped my thinking, poems that capture 
-                fleeting moments of beauty, and visions that offer gentle wisdom for the journey we're all on.
-              </p>
-            </div>
+            <ContentEditor
+              page="about"
+              sectionKey="main-bio"
+              title="Main Bio"
+              defaultContent={`Welcome to TheWatchTower, a space born from a simple belief: that in our hurried world, we need places to pause, reflect, and remember what matters most. I am a collector of quiet moments, a student of human nature, and someone who finds profound meaning in the ordinary details of daily life.
+
+This corner of the internet serves as my watchtower—a place from which I observe the world with curiosity and wonder, then share what I see through words, poetry, prophecy, and stories. Here, you'll find reflections on books that have shaped my thinking, poems that capture fleeting moments of beauty, and visions that offer gentle wisdom for the journey we're all on.`}
+              className="space-y-6"
+            />
 
             {/* Philosophy */}
             <div className="bg-orange-50 rounded-xl p-8 md:p-12">
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
-                My Writing Philosophy
-              </h2>
-              <div className="space-y-4">
-                <p className="text-gray-700 leading-relaxed">
-                  I believe that the best writing doesn't shout—it whispers. It doesn't demand attention—it 
-                  earns it through honesty, beauty, and the recognition of shared humanity. Whether I'm 
-                  crafting a poem about morning light or sharing thoughts about a book that moved me, 
-                  my goal is always the same: to create moments of connection and understanding.
-                </p>
-                <p className="text-gray-700 leading-relaxed">
-                  In a world full of noise, I choose to write from the quiet spaces—those in-between 
-                  moments where wisdom often lives. I'm drawn to the power of simplicity, the beauty 
-                  of restraint, and the profound impact of carefully chosen words.
-                </p>
-              </div>
+              <ContentEditor
+                page="about"
+                sectionKey="philosophy"
+                title="My Writing Philosophy"
+                defaultContent={`I believe that the best writing doesn't shout—it whispers. It doesn't demand attention—it earns it through honesty, beauty, and the recognition of shared humanity. Whether I'm crafting a poem about morning light or sharing thoughts about a book that moved me, my goal is always the same: to create moments of connection and understanding.
+
+In a world full of noise, I choose to write from the quiet spaces—those in-between moments where wisdom often lives. I'm drawn to the power of simplicity, the beauty of restraint, and the profound impact of carefully chosen words.`}
+              />
             </div>
 
             {/* What You'll Find */}
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <h3 className="font-serif text-xl font-semibold text-gray-900">What You'll Find Here</h3>
-                <ul className="space-y-2 text-gray-600">
-                  <li>• Personal reflections on life, literature, and meaning</li>
-                  <li>• Poetry that captures fleeting moments of beauty</li>
-                  <li>• Prophetic visions offering gentle wisdom</li>
-                  <li>• Book recommendations that have shaped my thinking</li>
-                  <li>• Thoughts on the art of slow living and mindful reading</li>
-                </ul>
-              </div>
+              <ContentEditor
+                page="about"
+                sectionKey="what-youll-find"
+                title="What You'll Find Here"
+                defaultContent={`• Personal reflections on life, literature, and meaning
+• Poetry that captures fleeting moments of beauty
+• Prophetic visions offering gentle wisdom
+• Book recommendations that have shaped my thinking
+• Thoughts on the art of slow living and mindful reading`}
+              />
               
-              <div className="space-y-4">
-                <h3 className="font-serif text-xl font-semibold text-gray-900">My Hope for You</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  My hope is that something here resonates with you—whether it's a line of poetry 
-                  that captures how you're feeling, a reflection that offers a new perspective, 
-                  or simply the reminder that you're not alone in finding meaning in the small, 
-                  sacred moments of everyday life.
-                </p>
-              </div>
+              <ContentEditor
+                page="about"
+                sectionKey="hope-for-you"
+                title="My Hope for You"
+                defaultContent="My hope is that something here resonates with you—whether it's a line of poetry that captures how you're feeling, a reflection that offers a new perspective, or simply the reminder that you're not alone in finding meaning in the small, sacred moments of everyday life."
+              />
             </div>
 
-            {/* Contact Section */}
+            {/* Contact Section - keeping form as is since it's functional */}
             <div className="bg-white border border-orange-200 rounded-xl p-8 md:p-12 shadow-sm">
               <div className="text-center mb-8">
                 <Mail className="h-10 w-10 text-orange-700 mx-auto mb-4" />
@@ -129,6 +113,7 @@ const About = () => {
                 </p>
               </div>
 
+              {/* ... keep existing code (form) */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -228,16 +213,15 @@ const About = () => {
             {/* Newsletter Signup */}
             <div className="bg-orange-50 rounded-xl p-8 md:p-12 text-center">
               <BookOpen className="h-10 w-10 text-orange-700 mx-auto mb-6" />
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
-                Join the Newsletter
-              </h2>
-              <p className="text-gray-600 text-lg mb-6 max-w-lg mx-auto">
-                Receive new writings, poetry, and reflections delivered gently to your inbox. 
-                No spam, just meaningful content when inspiration strikes.
-              </p>
-              <p className="text-sm text-gray-500">
-                Simply check the newsletter box in the form above, or mention it in your message.
-              </p>
+              <ContentEditor
+                page="about"
+                sectionKey="newsletter"
+                title="Join the Newsletter"
+                defaultContent={`Receive new writings, poetry, and reflections delivered gently to your inbox. No spam, just meaningful content when inspiration strikes.
+
+Simply check the newsletter box in the form above, or mention it in your message.`}
+                className="text-center"
+              />
             </div>
           </div>
         </div>
