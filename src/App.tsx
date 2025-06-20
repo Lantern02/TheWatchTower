@@ -14,6 +14,8 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import DynamicSection from "./pages/DynamicSection";
 import MediumEditor from "./components/MediumEditor";
+import Trending from "./pages/Trending";
+import Bookmarks from "./pages/Bookmarks";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/store" element={<Store />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/trending" element={<Trending />} />
+              <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/posts/new" element={
                 <MediumEditor 
