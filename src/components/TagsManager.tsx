@@ -36,8 +36,8 @@ const TagsManager = ({ tags, onTagsChange, placeholder = "Add tags..." }: TagsMa
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Tag className="h-4 w-4 text-gray-400" />
-        <span className="text-sm font-medium text-gray-300">Tags</span>
+        <Tag className="h-4 w-4 text-gray-500" />
+        <span className="text-sm font-medium text-gray-700">Tags</span>
       </div>
       
       <div className="flex flex-wrap gap-2 mb-3">
@@ -45,13 +45,13 @@ const TagsManager = ({ tags, onTagsChange, placeholder = "Add tags..." }: TagsMa
           <Badge
             key={tag}
             variant="secondary"
-            className="bg-blue-500/20 text-blue-300 border-blue-400/30 flex items-center gap-1"
+            className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1 hover:bg-blue-200 transition-colors"
           >
             {tag}
             <Button
               variant="ghost"
               size="sm"
-              className="h-4 w-4 p-0 hover:bg-blue-400/20"
+              className="h-4 w-4 p-0 hover:bg-blue-300/50 text-blue-600"
               onClick={() => removeTag(tag)}
             >
               <X className="h-3 w-3" />
@@ -66,13 +66,13 @@ const TagsManager = ({ tags, onTagsChange, placeholder = "Add tags..." }: TagsMa
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
-          className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
+          className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
         <Button
           onClick={addTag}
           variant="outline"
           size="sm"
-          className="border-slate-600 text-gray-300 hover:bg-slate-700"
+          className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
         >
           <Plus className="h-4 w-4" />
         </Button>

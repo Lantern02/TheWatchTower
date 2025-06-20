@@ -1,9 +1,10 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Upload, Save, Eye, EyeOff, Image as ImageIcon, Type, Bold, Italic, List, AlignLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, Save, Eye, EyeOff, Image as ImageIcon, Type, Bold, Italic, List, AlignLeft, Underline, Link } from 'lucide-react';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import TagsManager from './TagsManager';
 import ReadingProgress from './ReadingProgress';
@@ -44,8 +45,25 @@ const MediumEditor = ({
   const [isPublished, setIsPublished] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [excerpt, setExcerpt] = useState('');
+  const [category, setCategory] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Categories available for selection
+  const categories = [
+    'Blog',
+    'Poetry', 
+    'Prophecy',
+    'Book Picks',
+    'Personal',
+    'Technology',
+    'Lifestyle',
+    'Travel',
+    'Food',
+    'Health',
+    'Business',
+    'Entertainment'
+  ];
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,7 +80,8 @@ const MediumEditor = ({
     if (contentRef.current) {
       const htmlContent = contentRef.current.innerHTML;
       setContent({
-        html: htmlContent
+        html: htmlContent,
+        category: category
       });
     }
   };
@@ -75,11 +94,26 @@ const MediumEditor = ({
 
   const formatText = (command: string, value?: string) => {
     document.execCommand(command, false, value);
+    contentRef.current?.focus();
     handleContentChange();
+  };
+
+  const insertLink = () => {
+    const url = prompt('Enter URL:');
+    if (url) {
+      formatText('createLink', url);
+    }
   };
 
   // Calculate word count
   const wordCount = content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length : 0;
+
+  // Focus the editor when component mounts
+  useEffect(() => {
+    if (contentRef.current && !content.html) {
+      contentRef.current.focus();
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,6 +214,25 @@ const MediumEditor = ({
               className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900" 
             />
 
+            {/* Category Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="w-full max-w-xs bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat.toLowerCase()}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Excerpt */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -202,16 +255,16 @@ const MediumEditor = ({
               />
             </div>
 
-            {/* Formatting Toolbar */}
-            <div className="border-b border-gray-200 pb-4 mb-6">
-              <div className="flex items-center gap-2 flex-wrap">
+            {/* Enhanced Formatting Toolbar */}
+            <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
+              <div className="flex items-center gap-1 flex-wrap">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => formatText('bold')}
-                  className="hover:bg-gray-100"
-                  title="Bold"
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Bold (Ctrl+B)"
                 >
                   <Bold className="h-4 w-4" />
                 </Button>
@@ -220,10 +273,41 @@ const MediumEditor = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => formatText('italic')}
-                  className="hover:bg-gray-100"
-                  title="Italic"
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Italic (Ctrl+I)"
                 >
                   <Italic className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => formatText('underline')}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Underline (Ctrl+U)"
+                >
+                  <Underline className="h-4 w-4" />
+                </Button>
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => formatText('formatBlock', 'h2')}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Heading 2"
+                >
+                  <Type className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => formatText('formatBlock', 'h3')}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300 text-xs font-medium px-2"
+                  title="Heading 3"
+                >
+                  H3
                 </Button>
                 <div className="w-px h-6 bg-gray-300 mx-2"></div>
                 <Button
@@ -231,7 +315,7 @@ const MediumEditor = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => formatText('insertUnorderedList')}
-                  className="hover:bg-gray-100"
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
                   title="Bullet List"
                 >
                   <List className="h-4 w-4" />
@@ -240,38 +324,69 @@ const MediumEditor = ({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => formatText('formatBlock', 'h2')}
-                  className="hover:bg-gray-100"
-                  title="Heading"
+                  onClick={() => formatText('insertOrderedList')}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300 text-xs font-medium px-2"
+                  title="Numbered List"
                 >
-                  <Type className="h-4 w-4" />
+                  1.
+                </Button>
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={insertLink}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Insert Link"
+                >
+                  <Link className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => formatText('justifyLeft')}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300"
+                  title="Align Left"
+                >
+                  <AlignLeft className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Content Editor */}
-            <div 
-              ref={contentRef} 
-              contentEditable 
-              className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border border-gray-200 rounded-lg p-6 bg-white" 
-              onInput={handleContentChange} 
-              dangerouslySetInnerHTML={{
-                __html: content.html || ''
-              }} 
-              style={{
-                fontSize: '18px',
-                lineHeight: '1.7',
-                letterSpacing: '-0.003em'
-              }} 
-            />
-            
-            {(!content.html || content.html === '') && (
-              <div className="absolute inset-6 pointer-events-none">
-                <p className="text-gray-400 text-lg mt-4">
+            {/* Content Editor with proper styling and direction */}
+            <div className="relative">
+              <div 
+                ref={contentRef} 
+                contentEditable 
+                suppressContentEditableWarning={true}
+                className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
+                onInput={handleContentChange}
+                onPaste={(e) => {
+                  // Handle paste to maintain proper formatting
+                  e.preventDefault();
+                  const text = e.clipboardData.getData('text/plain');
+                  document.execCommand('insertText', false, text);
+                }}
+                style={{
+                  fontSize: '18px',
+                  lineHeight: '1.7',
+                  letterSpacing: '-0.003em',
+                  direction: 'ltr',
+                  textAlign: 'left',
+                  unicodeBidi: 'normal'
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: content.html || ''
+                }}
+              />
+              
+              {(!content.html || content.html === '') && (
+                <div className="absolute top-6 left-6 pointer-events-none text-gray-400 text-lg">
                   Start writing your story...
-                </p>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </Card>
       </div>
