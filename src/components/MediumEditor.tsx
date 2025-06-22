@@ -295,6 +295,7 @@ const MediumEditor = ({
               onChange={e => setTitle(e.target.value)} 
               placeholder="Your story title..." 
               className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900" 
+              style={{ direction: 'ltr' }}
             />
 
             {/* Category Selection - Connected to Dashboard */}
@@ -326,6 +327,7 @@ const MediumEditor = ({
                 onChange={e => setExcerpt(e.target.value)} 
                 placeholder="What's your story about?" 
                 className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                style={{ direction: 'ltr' }}
               />
             </div>
 
@@ -422,7 +424,7 @@ const MediumEditor = ({
               </div>
             </div>
 
-            {/* Content Editor with proper LTR direction and fixed writing */}
+            {/* Content Editor with proper LTR direction and English writing */}
             <div className="relative">
               <div 
                 ref={contentRef} 
@@ -430,11 +432,27 @@ const MediumEditor = ({
                 suppressContentEditableWarning={true}
                 className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
                 onInput={handleContentChange}
+                onKeyDown={(e) => {
+                  // Prevent Hebrew/Arabic input direction changes
+                  if (e.key === 'Delete' || e.key === 'Backspace') {
+                    setTimeout(() => {
+                      if (contentRef.current) {
+                        contentRef.current.style.direction = 'ltr';
+                        contentRef.current.style.textAlign = 'left';
+                      }
+                    }, 0);
+                  }
+                }}
                 onPaste={(e) => {
                   // Handle paste to maintain proper formatting
                   e.preventDefault();
                   const text = e.clipboardData.getData('text/plain');
                   document.execCommand('insertText', false, text);
+                  // Ensure direction stays LTR
+                  if (contentRef.current) {
+                    contentRef.current.style.direction = 'ltr';
+                    contentRef.current.style.textAlign = 'left';
+                  }
                 }}
                 style={{
                   fontSize: '18px',
@@ -449,6 +467,7 @@ const MediumEditor = ({
                   __html: content.html || ''
                 }}
                 dir="ltr"
+                lang="en"
               />
               
               {(!content.html || content.html === '') && (
