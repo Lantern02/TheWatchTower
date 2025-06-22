@@ -16,6 +16,9 @@ const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
     }
   }, []);
 
+  // Check if there's actual text content (not just HTML tags)
+  const hasContent = content.html && content.html.replace(/<[^>]*>/g, '').trim().length > 0;
+
   return (
     <div className="relative">
       <div 
@@ -38,9 +41,9 @@ const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
         spellCheck="true"
       />
       
-      {(!content.html || content.html === '') && (
+      {!hasContent && (
         <div className="absolute top-6 left-6 pointer-events-none text-gray-400 text-lg" style={{ direction: 'ltr', textAlign: 'left' }}>
-          Start writing your story... Click the "1-10" button above to test English writing direction.
+          Start writing your story...
         </div>
       )}
     </div>
