@@ -162,6 +162,24 @@ const MediumEditor = ({
     }
   };
 
+  const insertNumbers = () => {
+    if (contentRef.current) {
+      const numbers = '1 2 3 4 5 6 7 8 9 10 ';
+      document.execCommand('insertText', false, numbers);
+      handleContentChange();
+    }
+  };
+
+  const forceLTR = () => {
+    if (contentRef.current) {
+      contentRef.current.style.direction = 'ltr';
+      contentRef.current.style.textAlign = 'left';
+      contentRef.current.style.unicodeBidi = 'embed';
+      contentRef.current.setAttribute('dir', 'ltr');
+      contentRef.current.setAttribute('lang', 'en');
+    }
+  };
+
   // Calculate word count
   const wordCount = content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length : 0;
 
@@ -169,6 +187,7 @@ const MediumEditor = ({
   useEffect(() => {
     if (contentRef.current && !content.html) {
       contentRef.current.focus();
+      forceLTR();
     }
   }, []);
 
@@ -176,6 +195,7 @@ const MediumEditor = ({
   useEffect(() => {
     const handleSelectionChange = () => {
       updateActiveFormats();
+      forceLTR();
     };
 
     document.addEventListener('selectionchange', handleSelectionChange);
@@ -295,7 +315,9 @@ const MediumEditor = ({
               onChange={e => setTitle(e.target.value)} 
               placeholder="Your story title..." 
               className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900" 
-              style={{ direction: 'ltr' }}
+              style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'embed' }}
+              dir="ltr"
+              lang="en"
             />
 
             {/* Category Selection - Connected to Dashboard */}
@@ -327,7 +349,9 @@ const MediumEditor = ({
                 onChange={e => setExcerpt(e.target.value)} 
                 placeholder="What's your story about?" 
                 className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
-                style={{ direction: 'ltr' }}
+                style={{ direction: 'ltr', textAlign: 'left', unicodeBidi: 'embed' }}
+                dir="ltr"
+                lang="en"
               />
             </div>
 
@@ -421,10 +445,21 @@ const MediumEditor = ({
                 >
                   <AlignLeft className="h-4 w-4" />
                 </Button>
+                <div className="w-px h-6 bg-gray-300 mx-2"></div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={insertNumbers}
+                  className="hover:bg-gray-200 border border-transparent hover:border-gray-300 text-xs font-medium px-2"
+                  title="Insert Numbers 1-10"
+                >
+                  1-10
+                </Button>
               </div>
             </div>
 
-            {/* Content Editor with proper LTR direction and English writing */}
+            {/* Content Editor with enhanced LTR enforcement */}
             <div className="relative">
               <div 
                 ref={contentRef} 
@@ -432,16 +467,11 @@ const MediumEditor = ({
                 suppressContentEditableWarning={true}
                 className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
                 onInput={handleContentChange}
+                onFocus={forceLTR}
+                onClick={forceLTR}
                 onKeyDown={(e) => {
-                  // Prevent Hebrew/Arabic input direction changes
-                  if (e.key === 'Delete' || e.key === 'Backspace') {
-                    setTimeout(() => {
-                      if (contentRef.current) {
-                        contentRef.current.style.direction = 'ltr';
-                        contentRef.current.style.textAlign = 'left';
-                      }
-                    }, 0);
-                  }
+                  // Force LTR on any key press
+                  setTimeout(forceLTR, 0);
                 }}
                 onPaste={(e) => {
                   // Handle paste to maintain proper formatting
@@ -449,10 +479,7 @@ const MediumEditor = ({
                   const text = e.clipboardData.getData('text/plain');
                   document.execCommand('insertText', false, text);
                   // Ensure direction stays LTR
-                  if (contentRef.current) {
-                    contentRef.current.style.direction = 'ltr';
-                    contentRef.current.style.textAlign = 'left';
-                  }
+                  setTimeout(forceLTR, 0);
                 }}
                 style={{
                   fontSize: '18px',
@@ -468,11 +495,12 @@ const MediumEditor = ({
                 }}
                 dir="ltr"
                 lang="en"
+                spellCheck="true"
               />
               
               {(!content.html || content.html === '') && (
                 <div className="absolute top-6 left-6 pointer-events-none text-gray-400 text-lg">
-                  Start writing your story...
+                  Start writing your story... Try the 1-10 button above to test English writing.
                 </div>
               )}
             </div>
