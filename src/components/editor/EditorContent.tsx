@@ -103,6 +103,11 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Prevent losing focus when clicking on the editor
+    e.stopPropagation();
+  };
+
   // Update content only when not actively typing
   useEffect(() => {
     if (editorRef.current && content.html && !isUpdatingContent) {
@@ -128,6 +133,7 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onClick={handleClick}
+        onMouseDown={handleMouseDown}
         onFocus={() => setIsUpdatingContent(false)}
         onBlur={() => setIsUpdatingContent(false)}
         style={{

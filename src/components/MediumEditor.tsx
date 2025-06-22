@@ -140,21 +140,47 @@ const MediumEditor = ({
   const formatText = (command: string, value?: string) => {
     if (!contentRef.current) return;
     
-    // Focus the editor first
+    // Save current selection before any operations
+    const selection = window.getSelection();
+    let savedRange = null;
+    
+    if (selection && selection.rangeCount > 0) {
+      savedRange = selection.getRangeAt(0).cloneRange();
+    }
+    
+    // Ensure the editor is focused
     contentRef.current.focus();
+    
+    // Restore selection if we had one
+    if (savedRange) {
+      const newSelection = window.getSelection();
+      if (newSelection) {
+        newSelection.removeAllRanges();
+        newSelection.addRange(savedRange);
+      }
+    }
     
     // Execute the formatting command
     try {
       const success = document.execCommand(command, false, value);
       console.log(`Command ${command} executed:`, success);
       
-      // Trigger content change after a short delay
+      // Keep focus on the editor after formatting
+      if (contentRef.current) {
+        contentRef.current.focus();
+      }
+      
+      // Trigger content change and update formats
       setTimeout(() => {
         handleContentChange();
         updateActiveFormats();
       }, 10);
     } catch (error) {
       console.error('Format command failed:', error);
+      // Ensure focus is maintained even if command fails
+      if (contentRef.current) {
+        contentRef.current.focus();
+      }
     }
   };
 
@@ -176,6 +202,10 @@ const MediumEditor = ({
     const url = prompt('Enter URL:');
     if (url) {
       formatText('createLink', url);
+    }
+    // Ensure editor regains focus after prompt
+    if (contentRef.current) {
+      setTimeout(() => contentRef.current?.focus(), 100);
     }
   };
 
@@ -202,6 +232,8 @@ const MediumEditor = ({
         contentRef.current.appendChild(numbersText);
       }
       
+      // Keep focus on editor
+      contentRef.current.focus();
       handleContentChange();
     }
   };
@@ -320,12 +352,14 @@ const MediumEditor = ({
             </div>
 
             {/* Formatting Toolbar */}
-            <EditorToolbar
-              activeFormats={activeFormats}
-              onFormat={formatText}
-              onInsertLink={insertLink}
-              onInsertNumbers={insertNumbers}
-            />
+            <div onMouseDown={(e) => e.preventDefault()}>
+              <EditorToolbar
+                activeFormats={activeFormats}
+                onFormat={formatText}
+                onInsertLink={insertLink}
+                onInsertNumbers={insertNumbers}
+              />
+            </div>
 
             {/* Content Editor */}
             <EditorContent
