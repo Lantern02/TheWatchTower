@@ -196,7 +196,7 @@ const MediumEditor = ({
       // Apply LTR styles directly to the element
       const element = contentRef.current;
       
-      // Set all necessary CSS properties for LTR
+      // Set all necessary CSS properties for LTR without !important
       element.style.direction = 'ltr';
       element.style.textAlign = 'left';
       element.style.unicodeBidi = 'bidi-override';
@@ -565,10 +565,10 @@ const MediumEditor = ({
                   fontSize: '18px',
                   lineHeight: '1.7',
                   letterSpacing: '-0.003em',
-                  direction: 'ltr !important',
-                  textAlign: 'left !important',
-                  unicodeBidi: 'bidi-override !important',
-                  writingMode: 'horizontal-tb !important'
+                  direction: 'ltr',
+                  textAlign: 'left',
+                  unicodeBidi: 'bidi-override',
+                  writingMode: 'horizontal-tb'
                 }}
                 dangerouslySetInnerHTML={{
                   __html: content.html || ''
