@@ -93,8 +93,6 @@ const MediumEditor = ({
         html: htmlContent,
         category: category
       });
-      // Ensure LTR after content changes
-      forceLTR();
     }
   };
 
@@ -187,93 +185,29 @@ const MediumEditor = ({
       }
       
       handleContentChange();
-      forceLTR();
-    }
-  };
-
-  const forceLTR = () => {
-    if (contentRef.current) {
-      const element = contentRef.current;
-      
-      // Remove any existing direction-related classes
-      element.classList.remove('rtl', 'ltr');
-      
-      // Add our LTR class
-      element.classList.add('force-ltr-direction');
-      
-      // Set HTML attributes with stronger values
-      element.setAttribute('dir', 'ltr');
-      element.setAttribute('lang', 'en');
-      element.setAttribute('data-direction', 'ltr');
-      
-      // Apply inline styles with higher specificity
-      element.style.cssText += `
-        direction: ltr !important;
-        text-align: left !important;
-        unicode-bidi: embed !important;
-        writing-mode: horizontal-tb !important;
-      `;
-      
-      // Also apply to any child elements that might affect direction
-      const allElements = element.querySelectorAll('*');
-      allElements.forEach((child: Element) => {
-        if (child instanceof HTMLElement) {
-          child.setAttribute('dir', 'ltr');
-          child.style.direction = 'ltr';
-          child.style.textAlign = 'left';
-        }
-      });
-      
-      // Force a reflow
-      element.offsetHeight;
-      
-      console.log('LTR enforced on content editor');
     }
   };
 
   // Calculate word count
   const wordCount = content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length : 0;
 
-  // Focus the editor when component mounts and enforce LTR
+  // Focus the editor when component mounts
   useEffect(() => {
-    if (contentRef.current) {
-      forceLTR();
-      if (!content.html) {
-        contentRef.current.focus();
-      }
+    if (contentRef.current && !content.html) {
+      contentRef.current.focus();
     }
   }, []);
 
-  // Update active formats when selection changes and enforce LTR
+  // Update active formats when selection changes
   useEffect(() => {
     const handleSelectionChange = () => {
       updateActiveFormats();
-      // Small delay to ensure DOM is updated
-      setTimeout(forceLTR, 10);
-    };
-
-    const handleInput = () => {
-      forceLTR();
-    };
-
-    const handleKeyDown = () => {
-      // Force LTR on any key press
-      setTimeout(forceLTR, 0);
     };
 
     document.addEventListener('selectionchange', handleSelectionChange);
     
-    if (contentRef.current) {
-      contentRef.current.addEventListener('input', handleInput);
-      contentRef.current.addEventListener('keydown', handleKeyDown);
-    }
-    
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
-      if (contentRef.current) {
-        contentRef.current.removeEventListener('input', handleInput);
-        contentRef.current.removeEventListener('keydown', handleKeyDown);
-      }
     };
   }, []);
 
@@ -289,27 +223,19 @@ const MediumEditor = ({
 
   return (
     <>
-      {/* Add CSS for stronger LTR enforcement */}
+      {/* Simple CSS for LTR direction */}
       <style>{`
-        .force-ltr-direction,
-        .force-ltr-direction *,
-        .force-ltr-direction p,
-        .force-ltr-direction div,
-        .force-ltr-direction span {
+        .ltr-editor {
           direction: ltr !important;
           text-align: left !important;
-          unicode-bidi: embed !important;
-          writing-mode: horizontal-tb !important;
         }
         
-        .force-ltr-input {
+        .ltr-input {
           direction: ltr !important;
           text-align: left !important;
-          unicode-bidi: embed !important;
-          writing-mode: horizontal-tb !important;
         }
         
-        .force-ltr-input::placeholder {
+        .ltr-input::placeholder {
           direction: ltr !important;
           text-align: left !important;
         }
@@ -414,14 +340,8 @@ const MediumEditor = ({
                 value={title} 
                 onChange={e => setTitle(e.target.value)} 
                 placeholder="Your story title..." 
-                className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900 force-ltr-input" 
+                className="text-4xl font-bold border-none p-0 mb-6 placeholder:text-gray-400 focus:ring-0 focus:outline-none bg-transparent resize-none h-auto min-h-[60px] text-gray-900 ltr-input" 
                 dir="ltr"
-                lang="en"
-                style={{
-                  direction: 'ltr',
-                  textAlign: 'left',
-                  unicodeBidi: 'embed'
-                }}
               />
 
               {/* Category Selection - Connected to Dashboard */}
@@ -452,14 +372,8 @@ const MediumEditor = ({
                   value={excerpt} 
                   onChange={e => setExcerpt(e.target.value)} 
                   placeholder="What's your story about?" 
-                  className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 force-ltr-input" 
+                  className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ltr-input" 
                   dir="ltr"
-                  lang="en"
-                  style={{
-                    direction: 'ltr',
-                    textAlign: 'left',
-                    unicodeBidi: 'embed'
-                  }}
                 />
               </div>
 
@@ -567,58 +481,30 @@ const MediumEditor = ({
                 </div>
               </div>
 
-              {/* Content Editor with enhanced LTR enforcement */}
+              {/* Content Editor with proper LTR direction */}
               <div className="relative">
                 <div 
                   ref={contentRef} 
                   contentEditable 
                   suppressContentEditableWarning={true}
-                  className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 force-ltr-direction" 
+                  className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 ltr-editor" 
                   onInput={handleContentChange}
-                  onFocus={forceLTR}
-                  onClick={forceLTR}
-                  onKeyDown={(e) => {
-                    // Force LTR on any key press
-                    setTimeout(forceLTR, 0);
-                  }}
-                  onPaste={(e) => {
-                    // Handle paste to maintain proper formatting
-                    e.preventDefault();
-                    const text = e.clipboardData.getData('text/plain');
-                    
-                    // Insert text using Selection API for better control
-                    const selection = window.getSelection();
-                    if (selection && selection.rangeCount > 0) {
-                      const range = selection.getRangeAt(0);
-                      range.deleteContents();
-                      const textNode = document.createTextNode(text);
-                      range.insertNode(textNode);
-                      range.setStartAfter(textNode);
-                      range.setEndAfter(textNode);
-                      selection.removeAllRanges();
-                      selection.addRange(range);
-                    }
-                    
-                    handleContentChange();
-                    // Ensure direction stays LTR
-                    setTimeout(forceLTR, 10);
-                  }}
                   style={{
                     fontSize: '18px',
                     lineHeight: '1.7',
-                    letterSpacing: '-0.003em'
+                    letterSpacing: '-0.003em',
+                    direction: 'ltr',
+                    textAlign: 'left'
                   }}
                   dangerouslySetInnerHTML={{
                     __html: content.html || ''
                   }}
                   dir="ltr"
-                  lang="en"
                   spellCheck="true"
-                  data-direction="ltr"
                 />
                 
                 {(!content.html || content.html === '') && (
-                  <div className="absolute top-6 left-6 pointer-events-none text-gray-400 text-lg force-ltr-direction" style={{ direction: 'ltr', textAlign: 'left' }}>
+                  <div className="absolute top-6 left-6 pointer-events-none text-gray-400 text-lg" style={{ direction: 'ltr', textAlign: 'left' }}>
                     Start writing your story... Click the "1-10" button above to test English writing direction.
                   </div>
                 )}
