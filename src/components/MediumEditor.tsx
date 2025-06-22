@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAutoSave } from '@/hooks/useAutoSave';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ReadingProgress from './ReadingProgress';
@@ -10,11 +9,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-// Import refactored components
+// Import refactored components and hooks
 import EditorHeader from './editor/EditorHeader';
 import CoverImageUpload from './editor/CoverImageUpload';
 import EditorToolbar from './editor/EditorToolbar';
 import EditorContent from './editor/EditorContent';
+import EditorMetadata from './editor/EditorMetadata';
+import { useEditorState } from '@/hooks/useEditorState';
+import { useEditorFormatting } from '@/hooks/useEditorFormatting';
 
 interface MediumEditorProps {
   postId?: string;
@@ -35,27 +37,46 @@ const MediumEditor = ({
 }: MediumEditorProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+
   const {
     title,
     setTitle,
     content,
-    setContent,
     saving,
     lastSaved,
-    save
-  } = useAutoSave({
+    save,
+    coverImage,
+    isPublished,
+    excerpt,
+    setExcerpt,
+    category,
+    setCategory,
+    activeFormats,
+    setActiveFormats,
+    contentRef,
+    handleImageUpload,
+    handleContentChange,
+    togglePublish,
+    wordCount
+  } = useEditorState({
     postId,
     sectionId,
     initialTitle,
-    initialContent
+    initialContent,
+    initialCoverImage,
+    onPublish
   });
 
-  const [coverImage, setCoverImage] = useState(initialCoverImage);
-  const [isPublished, setIsPublished] = useState(false);
-  const [excerpt, setExcerpt] = useState('');
-  const [category, setCategory] = useState('');
-  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
-  const contentRef = useRef<HTMLDivElement>(null);
+  const {
+    formatText,
+    insertLink,
+    insertNumbers
+  } = useEditorFormatting({
+    contentRef,
+    activeFormats,
+    setActiveFormats,
+    handleContentChange
+  });
 
   // Fetch sections from dashboard
   const { data: sections } = useQuery({
@@ -75,213 +96,6 @@ const MediumEditor = ({
     navigate('/');
     toast.success('Logged out successfully');
   };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        setCoverImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleContentChange = () => {
-    if (contentRef.current) {
-      const htmlContent = contentRef.current.innerHTML;
-      setContent({
-        html: htmlContent,
-        category: category
-      });
-    }
-  };
-
-  const togglePublish = async () => {
-    if (!title.trim()) {
-      toast.error('Please add a title before publishing');
-      return;
-    }
-    
-    if (!category) {
-      toast.error('Please select a category before publishing');
-      return;
-    }
-
-    try {
-      const newPublishState = !isPublished;
-      
-      // First save the post
-      await save();
-      
-      // Then update the published status
-      if (postId) {
-        const { error } = await supabase
-          .from('dynamic_posts')
-          .update({ 
-            is_published: newPublishState,
-            section_id: category,
-            excerpt: excerpt || content.html?.replace(/<[^>]*>/g, '').substring(0, 200)
-          })
-          .eq('id', postId);
-          
-        if (error) throw error;
-        
-        setIsPublished(newPublishState);
-        onPublish?.(newPublishState);
-        
-        toast.success(newPublishState ? 'Post published successfully!' : 'Post unpublished');
-      }
-    } catch (error: any) {
-      toast.error('Failed to publish post: ' + error.message);
-    }
-  };
-
-  const formatText = (command: string, value?: string) => {
-    if (!contentRef.current) return;
-    
-    // Save current selection before any operations
-    const selection = window.getSelection();
-    let savedRange = null;
-    
-    if (selection && selection.rangeCount > 0) {
-      savedRange = selection.getRangeAt(0).cloneRange();
-    }
-    
-    // Ensure the editor is focused
-    contentRef.current.focus();
-    
-    // Restore selection if we had one
-    if (savedRange) {
-      const newSelection = window.getSelection();
-      if (newSelection) {
-        newSelection.removeAllRanges();
-        newSelection.addRange(savedRange);
-      }
-    }
-    
-    // Execute the formatting command
-    try {
-      const success = document.execCommand(command, false, value);
-      console.log(`Command ${command} executed:`, success);
-      
-      // Keep focus on the editor after formatting
-      if (contentRef.current) {
-        contentRef.current.focus();
-      }
-      
-      // Trigger content change and update formats
-      setTimeout(() => {
-        handleContentChange();
-        updateActiveFormats();
-      }, 10);
-    } catch (error) {
-      console.error('Format command failed:', error);
-      // Ensure focus is maintained even if command fails
-      if (contentRef.current) {
-        contentRef.current.focus();
-      }
-    }
-  };
-
-  const updateActiveFormats = () => {
-    const formats = new Set<string>();
-    
-    try {
-      if (document.queryCommandState('bold')) formats.add('bold');
-      if (document.queryCommandState('italic')) formats.add('italic');
-      if (document.queryCommandState('underline')) formats.add('underline');
-    } catch (error) {
-      console.warn('Format detection error:', error);
-    }
-    
-    setActiveFormats(formats);
-  };
-
-  const insertLink = () => {
-    const url = prompt('Enter URL:');
-    if (url) {
-      formatText('createLink', url);
-    }
-    // Ensure editor regains focus after prompt
-    if (contentRef.current) {
-      setTimeout(() => contentRef.current?.focus(), 100);
-    }
-  };
-
-  const insertNumbers = () => {
-    if (contentRef.current) {
-      contentRef.current.focus();
-      
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
-        
-        range.deleteContents();
-        range.insertNode(numbersText);
-        
-        // Move cursor to end of inserted text
-        range.setStartAfter(numbersText);
-        range.setEndAfter(numbersText);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      } else {
-        // Fallback: append to end
-        const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
-        contentRef.current.appendChild(numbersText);
-      }
-      
-      // Keep focus on editor
-      contentRef.current.focus();
-      handleContentChange();
-    }
-  };
-
-  // Calculate word count
-  const wordCount = content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length : 0;
-
-  // Update active formats when selection changes
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const selection = window.getSelection();
-      if (selection && contentRef.current && contentRef.current.contains(selection.anchorNode)) {
-        updateActiveFormats();
-      }
-    };
-
-    const handleMouseUp = () => {
-      setTimeout(updateActiveFormats, 10);
-    };
-
-    const handleKeyUp = () => {
-      setTimeout(updateActiveFormats, 10);
-    };
-
-    document.addEventListener('selectionchange', handleSelectionChange);
-    if (contentRef.current) {
-      contentRef.current.addEventListener('mouseup', handleMouseUp);
-      contentRef.current.addEventListener('keyup', handleKeyUp);
-    }
-    
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-      if (contentRef.current) {
-        contentRef.current.removeEventListener('mouseup', handleMouseUp);
-        contentRef.current.removeEventListener('keyup', handleKeyUp);
-      }
-    };
-  }, []);
-
-  // Update category when it changes
-  useEffect(() => {
-    if (category) {
-      setContent(prev => ({
-        ...prev,
-        category: category
-      }));
-    }
-  }, [category, setContent]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -318,38 +132,14 @@ const MediumEditor = ({
               dir="ltr"
             />
 
-            {/* Category Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-full max-w-xs bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sections?.map((section) => (
-                    <SelectItem key={section.id} value={section.id}>
-                      {section.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Excerpt */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Excerpt (Brief description)
-              </label>
-              <Input 
-                value={excerpt} 
-                onChange={e => setExcerpt(e.target.value)} 
-                placeholder="What's your story about?" 
-                className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
-                dir="ltr"
-              />
-            </div>
+            {/* Category and Excerpt */}
+            <EditorMetadata
+              category={category}
+              setCategory={setCategory}
+              excerpt={excerpt}
+              setExcerpt={setExcerpt}
+              sections={sections}
+            />
 
             {/* Formatting Toolbar */}
             <div onMouseDown={(e) => e.preventDefault()}>
