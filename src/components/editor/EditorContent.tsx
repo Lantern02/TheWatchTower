@@ -4,22 +4,24 @@ import React, { useRef, useEffect, useState } from 'react';
 interface EditorContentProps {
   content: any;
   onContentChange: () => void;
+  contentRef?: React.RefObject<HTMLDivElement>;
 }
 
-const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
-  const contentRef = useRef<HTMLDivElement>(null);
+const EditorContent = ({ content, onContentChange, contentRef }: EditorContentProps) => {
+  const internalRef = useRef<HTMLDivElement>(null);
+  const editorRef = contentRef || internalRef;
   const [hasText, setHasText] = useState(false);
 
   // Focus the editor when component mounts
   useEffect(() => {
-    if (contentRef.current && !content.html) {
-      contentRef.current.focus();
+    if (editorRef.current && !content.html) {
+      editorRef.current.focus();
     }
   }, []);
 
   const handleInput = () => {
-    if (contentRef.current) {
-      const textContent = contentRef.current.innerText || contentRef.current.textContent || '';
+    if (editorRef.current) {
+      const textContent = editorRef.current.innerText || editorRef.current.textContent || '';
       setHasText(textContent.trim().length > 0);
     }
     onContentChange();
@@ -31,7 +33,7 @@ const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
   return (
     <div className="relative">
       <div 
-        ref={contentRef} 
+        ref={editorRef} 
         contentEditable 
         suppressContentEditableWarning={true}
         className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 

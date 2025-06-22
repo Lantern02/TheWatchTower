@@ -139,50 +139,65 @@ const MediumEditor = ({
   };
 
   const formatText = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    contentRef.current?.focus();
-    handleContentChange();
+    // Ensure the contentEditable element is focused
+    if (contentRef.current) {
+      contentRef.current.focus();
+    }
     
-    // Update active formats
+    // Execute the formatting command
+    document.execCommand(command, false, value);
+    
+    // Update content and active formats
+    handleContentChange();
     updateActiveFormats();
   };
 
   const updateActiveFormats = () => {
     const formats = new Set<string>();
     
-    if (document.queryCommandState('bold')) formats.add('bold');
-    if (document.queryCommandState('italic')) formats.add('italic');
-    if (document.queryCommandState('underline')) formats.add('underline');
+    // Check if commands are active
+    try {
+      if (document.queryCommandState('bold')) formats.add('bold');
+      if (document.queryCommandState('italic')) formats.add('italic');
+      if (document.queryCommandState('underline')) formats.add('underline');
+    } catch (error) {
+      // Some browsers might not support all commands
+      console.warn('Format detection error:', error);
+    }
     
     setActiveFormats(formats);
   };
 
   const insertLink = () => {
     const url = prompt('Enter URL:');
-    if (url) {
+    if (url && contentRef.current) {
+      contentRef.current.focus();
       formatText('createLink', url);
     }
   };
 
   const insertNumbers = () => {
     if (contentRef.current) {
+      contentRef.current.focus();
+      
       const selection = window.getSelection();
-      const range = selection?.getRangeAt(0);
-      
-      // Create a text node with numbers
-      const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
-      
-      if (range) {
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // Create a text node with numbers
+        const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
+        
         range.deleteContents();
         range.insertNode(numbersText);
         
         // Move cursor to end of inserted text
         range.setStartAfter(numbersText);
         range.setEndAfter(numbersText);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
+        selection.removeAllRanges();
+        selection.addRange(range);
       } else {
         // Fallback: append to end
+        const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
         contentRef.current.appendChild(numbersText);
       }
       
@@ -196,13 +211,35 @@ const MediumEditor = ({
   // Update active formats when selection changes
   useEffect(() => {
     const handleSelectionChange = () => {
-      updateActiveFormats();
+      // Only update if the selection is within our editor
+      const selection = window.getSelection();
+      if (selection && contentRef.current && contentRef.current.contains(selection.anchorNode)) {
+        updateActiveFormats();
+      }
+    };
+
+    const handleMouseUp = () => {
+      // Update formats on mouse up (after selection change)
+      setTimeout(updateActiveFormats, 10);
+    };
+
+    const handleKeyUp = () => {
+      // Update formats on key up (after potential formatting changes)
+      setTimeout(updateActiveFormats, 10);
     };
 
     document.addEventListener('selectionchange', handleSelectionChange);
+    if (contentRef.current) {
+      contentRef.current.addEventListener('mouseup', handleMouseUp);
+      contentRef.current.addEventListener('keyup', handleKeyUp);
+    }
     
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
+      if (contentRef.current) {
+        contentRef.current.removeEventListener('mouseup', handleMouseUp);
+        contentRef.current.removeEventListener('keyup', handleKeyUp);
+      }
     };
   }, []);
 
@@ -296,6 +333,7 @@ const MediumEditor = ({
             <EditorContent
               content={content}
               onContentChange={handleContentChange}
+              contentRef={contentRef}
             />
           </div>
         </Card>
