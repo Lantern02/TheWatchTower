@@ -17,6 +17,14 @@ const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
     }
   }, []);
 
+  // Initialize hasText state based on existing content
+  useEffect(() => {
+    if (contentRef.current) {
+      const textContent = contentRef.current.innerText || contentRef.current.textContent || '';
+      setHasText(textContent.trim().length > 0);
+    }
+  }, [content.html]);
+
   const handleInput = () => {
     if (contentRef.current) {
       const textContent = contentRef.current.innerText || contentRef.current.textContent || '';
@@ -36,6 +44,8 @@ const EditorContent = ({ content, onContentChange }: EditorContentProps) => {
         suppressContentEditableWarning={true}
         className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
         onInput={handleInput}
+        onKeyDown={handleInput}
+        onPaste={handleInput}
         style={{
           fontSize: '18px',
           lineHeight: '1.7',

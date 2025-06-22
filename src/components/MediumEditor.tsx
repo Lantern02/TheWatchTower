@@ -56,7 +56,6 @@ const MediumEditor = ({
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState('');
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
-  const contentRef = useRef<HTMLDivElement>(null);
 
   // Fetch sections from dashboard
   const { data: sections } = useQuery({
@@ -89,8 +88,10 @@ const MediumEditor = ({
   };
 
   const handleContentChange = () => {
-    if (contentRef.current) {
-      const htmlContent = contentRef.current.innerHTML;
+    // Get the current HTML content from the contentEditable div
+    const contentElement = document.querySelector('[contenteditable="true"]') as HTMLDivElement;
+    if (contentElement) {
+      const htmlContent = contentElement.innerHTML;
       setContent({
         html: htmlContent,
         category: category
@@ -140,7 +141,10 @@ const MediumEditor = ({
 
   const formatText = (command: string, value?: string) => {
     document.execCommand(command, false, value);
-    contentRef.current?.focus();
+    const contentElement = document.querySelector('[contenteditable="true"]') as HTMLDivElement;
+    if (contentElement) {
+      contentElement.focus();
+    }
     handleContentChange();
     
     // Update active formats
@@ -165,7 +169,8 @@ const MediumEditor = ({
   };
 
   const insertNumbers = () => {
-    if (contentRef.current) {
+    const contentElement = document.querySelector('[contenteditable="true"]') as HTMLDivElement;
+    if (contentElement) {
       const selection = window.getSelection();
       const range = selection?.getRangeAt(0);
       
@@ -183,7 +188,7 @@ const MediumEditor = ({
         selection?.addRange(range);
       } else {
         // Fallback: append to end
-        contentRef.current.appendChild(numbersText);
+        contentElement.appendChild(numbersText);
       }
       
       handleContentChange();
