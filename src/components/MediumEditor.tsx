@@ -139,29 +139,51 @@ const MediumEditor = ({
   };
 
   const formatText = (command: string, value?: string) => {
+    // Save current selection
+    const selection = window.getSelection();
+    let savedRange = null;
+    
+    if (selection && selection.rangeCount > 0) {
+      savedRange = selection.getRangeAt(0);
+    }
+
     // Ensure the contentEditable element is focused
     if (contentRef.current) {
       contentRef.current.focus();
+      
+      // Restore selection if it was saved
+      if (savedRange) {
+        const newSelection = window.getSelection();
+        if (newSelection) {
+          newSelection.removeAllRanges();
+          newSelection.addRange(savedRange);
+        }
+      }
     }
     
     // Execute the formatting command
-    document.execCommand(command, false, value);
+    try {
+      const success = document.execCommand(command, false, value);
+      console.log(`Command ${command} executed:`, success);
+    } catch (error) {
+      console.error('Format command failed:', error);
+    }
     
     // Update content and active formats
-    handleContentChange();
-    updateActiveFormats();
+    setTimeout(() => {
+      handleContentChange();
+      updateActiveFormats();
+    }, 10);
   };
 
   const updateActiveFormats = () => {
     const formats = new Set<string>();
     
-    // Check if commands are active
     try {
       if (document.queryCommandState('bold')) formats.add('bold');
       if (document.queryCommandState('italic')) formats.add('italic');
       if (document.queryCommandState('underline')) formats.add('underline');
     } catch (error) {
-      // Some browsers might not support all commands
       console.warn('Format detection error:', error);
     }
     
@@ -170,8 +192,7 @@ const MediumEditor = ({
 
   const insertLink = () => {
     const url = prompt('Enter URL:');
-    if (url && contentRef.current) {
-      contentRef.current.focus();
+    if (url) {
       formatText('createLink', url);
     }
   };
@@ -183,8 +204,6 @@ const MediumEditor = ({
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        
-        // Create a text node with numbers
         const numbersText = document.createTextNode('1 2 3 4 5 6 7 8 9 10 ');
         
         range.deleteContents();
@@ -211,7 +230,6 @@ const MediumEditor = ({
   // Update active formats when selection changes
   useEffect(() => {
     const handleSelectionChange = () => {
-      // Only update if the selection is within our editor
       const selection = window.getSelection();
       if (selection && contentRef.current && contentRef.current.contains(selection.anchorNode)) {
         updateActiveFormats();
@@ -219,12 +237,10 @@ const MediumEditor = ({
     };
 
     const handleMouseUp = () => {
-      // Update formats on mouse up (after selection change)
       setTimeout(updateActiveFormats, 10);
     };
 
     const handleKeyUp = () => {
-      // Update formats on key up (after potential formatting changes)
       setTimeout(updateActiveFormats, 10);
     };
 

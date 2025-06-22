@@ -27,6 +27,36 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
     onContentChange();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle keyboard shortcuts
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          document.execCommand('bold', false);
+          handleInput();
+          break;
+        case 'i':
+          e.preventDefault();
+          document.execCommand('italic', false);
+          handleInput();
+          break;
+        case 'u':
+          e.preventDefault();
+          document.execCommand('underline', false);
+          handleInput();
+          break;
+      }
+    }
+  };
+
+  const handleClick = () => {
+    // Ensure focus is maintained when clicking in the editor
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  };
+
   // Check if there's actual text content (not just HTML tags)
   const hasContent = content.html && content.html.replace(/<[^>]*>/g, '').trim().length > 0;
 
@@ -38,6 +68,8 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
         suppressContentEditableWarning={true}
         className="min-h-96 prose prose-lg max-w-none focus:outline-none text-gray-900 border-2 border-gray-300 rounded-lg p-6 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" 
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onClick={handleClick}
         style={{
           fontSize: '18px',
           lineHeight: '1.7',
