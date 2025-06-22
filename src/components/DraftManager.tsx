@@ -20,6 +20,15 @@ interface Draft {
   sectionTitle?: string;
 }
 
+interface PostWithSection {
+  id: string;
+  title: string;
+  content: any;
+  updated_at: string;
+  is_published: boolean;
+  sections: { title: string } | null;
+}
+
 const DraftManager = () => {
   const { user } = useAuth();
   const [localDrafts, setLocalDrafts] = useState<Draft[]>([]);
@@ -27,12 +36,12 @@ const DraftManager = () => {
   // Fetch drafts from database - only for authenticated users
   const { data: dbDrafts, refetch } = useQuery({
     queryKey: ['drafts', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<PostWithSection[]> => {
       if (!user) return [];
       
       const { data, error } = await supabase
         .from('dynamic_posts')
-        .select('id, title, content, updated_at, is_published, sections(title)')
+        .select('id, title, content, updated_at, is_published, sections!inner(title)')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       
@@ -41,7 +50,7 @@ const DraftManager = () => {
         return [];
       }
       
-      return data || [];
+      return data as PostWithSection[] || [];
     },
     enabled: !!user,
   });
@@ -82,7 +91,7 @@ const DraftManager = () => {
           lastModified: new Date(post.updated_at),
           wordCount: contentText.split(/\s+/).filter(word => word.length > 0).length,
           status: post.is_published ? 'published' : 'draft',
-          sectionTitle: (post.sections as any)?.title
+          sectionTitle: post.sections?.title
         });
       });
     }
