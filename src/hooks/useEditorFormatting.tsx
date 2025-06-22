@@ -35,7 +35,17 @@ export const useEditorFormatting = ({
     }
     
     try {
-      const success = document.execCommand(command, false, value);
+      let success = false;
+      
+      // Handle different formatting commands
+      if (command === 'formatBlock') {
+        success = document.execCommand(command, false, value);
+      } else if (command === 'createLink') {
+        success = document.execCommand(command, false, value);
+      } else {
+        success = document.execCommand(command, false, value);
+      }
+      
       console.log(`Command ${command} executed:`, success);
       
       if (contentRef.current) {
@@ -61,6 +71,26 @@ export const useEditorFormatting = ({
       if (document.queryCommandState('bold')) formats.add('bold');
       if (document.queryCommandState('italic')) formats.add('italic');
       if (document.queryCommandState('underline')) formats.add('underline');
+      
+      // Check for heading formats
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        let parentElement = range.commonAncestorContainer;
+        
+        if (parentElement.nodeType === Node.TEXT_NODE) {
+          parentElement = parentElement.parentElement;
+        }
+        
+        // Traverse up to find heading elements
+        while (parentElement && parentElement !== contentRef.current) {
+          const tagName = (parentElement as Element).tagName;
+          if (tagName === 'H1') formats.add('h1');
+          if (tagName === 'H2') formats.add('h2');
+          if (tagName === 'H3') formats.add('h3');
+          parentElement = parentElement.parentElement;
+        }
+      }
     } catch (error) {
       console.warn('Format detection error:', error);
     }

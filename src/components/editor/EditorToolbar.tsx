@@ -57,29 +57,25 @@ const EditorToolbar = ({
         
         <div className="w-px h-6 bg-gray-300 mx-2"></div>
         
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => onFormat('formatBlock', 'h2')} 
-          className="hover:bg-gray-200 border border-transparent hover:border-gray-300" 
+        <Toggle
+          pressed={activeFormats.has('h2')}
+          onPressedChange={() => onFormat('formatBlock', activeFormats.has('h2') ? 'div' : 'h2')}
+          className="hover:bg-gray-200"
           title="Heading 2"
           onMouseDown={handleMouseDown}
         >
           <Type className="h-4 w-4" />
-        </Button>
+        </Toggle>
         
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => onFormat('formatBlock', 'h3')} 
-          className="hover:bg-gray-200 border border-transparent hover:border-gray-300 text-xs font-medium px-2" 
+        <Toggle
+          pressed={activeFormats.has('h3')}
+          onPressedChange={() => onFormat('formatBlock', activeFormats.has('h3') ? 'div' : 'h3')}
+          className="hover:bg-gray-200 text-xs font-medium px-2"
           title="Heading 3"
           onMouseDown={handleMouseDown}
         >
           H3
-        </Button>
+        </Toggle>
         
         <div className="w-px h-6 bg-gray-300 mx-2"></div>
         

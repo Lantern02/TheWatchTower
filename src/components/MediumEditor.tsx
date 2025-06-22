@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ReadingProgress from './ReadingProgress';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 // Import refactored components and hooks
@@ -37,6 +37,28 @@ const MediumEditor = ({
 }: MediumEditorProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const params = useParams();
+  const actualPostId = postId || params.postId;
+
+  // Fetch existing post data if postId is provided
+  const { data: existingPost } = useQuery({
+    queryKey: ['post', actualPostId],
+    queryFn: async () => {
+      if (!actualPostId) return null;
+      const { data, error } = await supabase
+        .from('dynamic_posts')
+        .select('*')
+        .eq('id', actualPostId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching post:', error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!actualPostId
+  });
 
   const {
     title,
@@ -59,11 +81,11 @@ const MediumEditor = ({
     togglePublish,
     wordCount
   } = useEditorState({
-    postId,
+    postId: actualPostId,
     sectionId,
-    initialTitle,
-    initialContent,
-    initialCoverImage,
+    initialTitle: existingPost?.title || initialTitle,
+    initialContent: existingPost?.content || initialContent,
+    initialCoverImage: existingPost?.cover_image_url || initialCoverImage,
     onPublish
   });
 
@@ -77,6 +99,15 @@ const MediumEditor = ({
     setActiveFormats,
     handleContentChange
   });
+
+  // Load existing post content into editor when data is available
+  useEffect(() => {
+    if (existingPost && contentRef.current) {
+      if (existingPost.content?.html && contentRef.current.innerHTML !== existingPost.content.html) {
+        contentRef.current.innerHTML = existingPost.content.html;
+      }
+    }
+  }, [existingPost]);
 
   // Fetch sections from dashboard
   const { data: sections } = useQuery({

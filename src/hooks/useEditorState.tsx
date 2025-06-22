@@ -43,6 +43,33 @@ export const useEditorState = ({
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // Load initial publish state and other data when postId is available
+  useEffect(() => {
+    const loadPostData = async () => {
+      if (postId) {
+        try {
+          const { data, error } = await supabase
+            .from('dynamic_posts')
+            .select('*')
+            .eq('id', postId)
+            .single();
+          
+          if (error) throw error;
+          
+          if (data) {
+            setIsPublished(data.is_published || false);
+            setExcerpt(data.excerpt || '');
+            setCategory(data.section_id || '');
+          }
+        } catch (error) {
+          console.error('Error loading post data:', error);
+        }
+      }
+    };
+
+    loadPostData();
+  }, [postId]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -78,15 +105,18 @@ export const useEditorState = ({
     try {
       const newPublishState = !isPublished;
       
+      // First save the current content
       await save();
       
+      // Then update the publish state
       if (postId) {
         const { error } = await supabase
           .from('dynamic_posts')
           .update({ 
             is_published: newPublishState,
             section_id: category,
-            excerpt: excerpt || content.html?.replace(/<[^>]*>/g, '').substring(0, 200)
+            excerpt: excerpt || content.html?.replace(/<[^>]*>/g, '').substring(0, 200),
+            updated_at: new Date().toISOString()
           })
           .eq('id', postId);
           
@@ -96,8 +126,11 @@ export const useEditorState = ({
         onPublish?.(newPublishState);
         
         toast.success(newPublishState ? 'Post published successfully!' : 'Post unpublished');
+      } else {
+        toast.error('Please save the post first before publishing');
       }
     } catch (error: any) {
+      console.error('Publish error:', error);
       toast.error('Failed to publish post: ' + error.message);
     }
   };
