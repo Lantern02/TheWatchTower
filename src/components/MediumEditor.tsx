@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -139,41 +138,24 @@ const MediumEditor = ({
   };
 
   const formatText = (command: string, value?: string) => {
-    // Save current selection
-    const selection = window.getSelection();
-    let savedRange = null;
+    if (!contentRef.current) return;
     
-    if (selection && selection.rangeCount > 0) {
-      savedRange = selection.getRangeAt(0);
-    }
-
-    // Ensure the contentEditable element is focused
-    if (contentRef.current) {
-      contentRef.current.focus();
-      
-      // Restore selection if it was saved
-      if (savedRange) {
-        const newSelection = window.getSelection();
-        if (newSelection) {
-          newSelection.removeAllRanges();
-          newSelection.addRange(savedRange);
-        }
-      }
-    }
+    // Focus the editor first
+    contentRef.current.focus();
     
     // Execute the formatting command
     try {
       const success = document.execCommand(command, false, value);
       console.log(`Command ${command} executed:`, success);
+      
+      // Trigger content change after a short delay
+      setTimeout(() => {
+        handleContentChange();
+        updateActiveFormats();
+      }, 10);
     } catch (error) {
       console.error('Format command failed:', error);
     }
-    
-    // Update content and active formats
-    setTimeout(() => {
-      handleContentChange();
-      updateActiveFormats();
-    }, 10);
   };
 
   const updateActiveFormats = () => {

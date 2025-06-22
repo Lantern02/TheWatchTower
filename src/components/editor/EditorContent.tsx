@@ -11,6 +11,7 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
   const internalRef = useRef<HTMLDivElement>(null);
   const editorRef = contentRef || internalRef;
   const [hasText, setHasText] = useState(false);
+  const [isUpdatingContent, setIsUpdatingContent] = useState(false);
 
   // Focus the editor when component mounts
   useEffect(() => {
@@ -18,6 +19,51 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
       editorRef.current.focus();
     }
   }, []);
+
+  // Save and restore cursor position
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && editorRef.current) {
+      const range = selection.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(editorRef.current);
+      preCaretRange.setEnd(range.startContainer, range.startOffset);
+      return preCaretRange.toString().length;
+    }
+    return 0;
+  };
+
+  const restoreCursorPosition = (savedPosition: number) => {
+    if (!editorRef.current) return;
+    
+    const walker = document.createTreeWalker(
+      editorRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+    
+    let currentPosition = 0;
+    let node;
+    
+    while (node = walker.nextNode()) {
+      const textLength = node.textContent?.length || 0;
+      if (currentPosition + textLength >= savedPosition) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        const offset = savedPosition - currentPosition;
+        
+        range.setStart(node, Math.min(offset, textLength));
+        range.setEnd(node, Math.min(offset, textLength));
+        
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+        break;
+      }
+      currentPosition += textLength;
+    }
+  };
 
   const handleInput = () => {
     if (editorRef.current) {
@@ -57,6 +103,18 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
     }
   };
 
+  // Update content only when not actively typing
+  useEffect(() => {
+    if (editorRef.current && content.html && !isUpdatingContent) {
+      const currentContent = editorRef.current.innerHTML;
+      if (currentContent !== content.html) {
+        const cursorPosition = saveCursorPosition();
+        editorRef.current.innerHTML = content.html;
+        setTimeout(() => restoreCursorPosition(cursorPosition), 0);
+      }
+    }
+  }, [content.html, isUpdatingContent]);
+
   // Check if there's actual text content (not just HTML tags)
   const hasContent = content.html && content.html.replace(/<[^>]*>/g, '').trim().length > 0;
 
@@ -70,15 +128,14 @@ const EditorContent = ({ content, onContentChange, contentRef }: EditorContentPr
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onClick={handleClick}
+        onFocus={() => setIsUpdatingContent(false)}
+        onBlur={() => setIsUpdatingContent(false)}
         style={{
           fontSize: '18px',
           lineHeight: '1.7',
           letterSpacing: '-0.003em',
           direction: 'ltr',
           textAlign: 'left'
-        }}
-        dangerouslySetInnerHTML={{
-          __html: content.html || ''
         }}
         dir="ltr"
         spellCheck="true"
