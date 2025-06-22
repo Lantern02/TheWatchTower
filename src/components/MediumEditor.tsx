@@ -60,6 +60,21 @@ const MediumEditor = ({
     enabled: !!actualPostId
   });
 
+  // Helper function to safely parse content
+  const parseContent = (content: any) => {
+    if (!content) return {};
+    if (typeof content === 'string') {
+      try {
+        return JSON.parse(content);
+      } catch {
+        return { html: content };
+      }
+    }
+    return content;
+  };
+
+  const parsedExistingContent = existingPost ? parseContent(existingPost.content) : initialContent;
+
   const {
     title,
     setTitle,
@@ -84,7 +99,7 @@ const MediumEditor = ({
     postId: actualPostId,
     sectionId,
     initialTitle: existingPost?.title || initialTitle,
-    initialContent: existingPost?.content || initialContent,
+    initialContent: parsedExistingContent,
     initialCoverImage: existingPost?.cover_image_url || initialCoverImage,
     onPublish
   });
@@ -103,8 +118,9 @@ const MediumEditor = ({
   // Load existing post content into editor when data is available
   useEffect(() => {
     if (existingPost && contentRef.current) {
-      if (existingPost.content?.html && contentRef.current.innerHTML !== existingPost.content.html) {
-        contentRef.current.innerHTML = existingPost.content.html;
+      const parsedContent = parseContent(existingPost.content);
+      if (parsedContent?.html && contentRef.current.innerHTML !== parsedContent.html) {
+        contentRef.current.innerHTML = parsedContent.html;
       }
     }
   }, [existingPost]);
