@@ -1,6 +1,7 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface UseAutoSaveProps {
@@ -10,115 +11,95 @@ interface UseAutoSaveProps {
   initialContent?: any;
 }
 
-export const useAutoSave = ({ postId, sectionId, initialTitle = '', initialContent = {} }: UseAutoSaveProps) => {
+export const useAutoSave = ({
+  postId,
+  sectionId,
+  initialTitle = '',
+  initialContent = {}
+}: UseAutoSaveProps) => {
+  const { user } = useAuth();
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [currentPostId, setCurrentPostId] = useState(postId);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const save = useCallback(async () => {
-    if (!title.trim()) {
-      console.log('Cannot save: missing title');
+  // Auto-save when title or content changes
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Only auto-save if we have content or title and user is authenticated
+    if ((title.trim() || (content.html && content.html.trim())) && user) {
+      saveTimeoutRef.current = setTimeout(() => {
+        save();
+      }, 2000); // Auto-save after 2 seconds of inactivity
+    }
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [title, content, user]);
+
+  const save = async () => {
+    if (!user) {
+      toast.error('Please log in to save your work');
       return;
     }
-    
+
+    if (!title.trim()) {
+      return; // Don't save without a title
+    }
+
     setSaving(true);
+
     try {
-      let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       
-      // Ensure slug is not empty
-      if (!slug) {
-        slug = 'untitled-' + Date.now();
-      }
-      
-      if (currentPostId) {
+      const postData = {
+        title,
+        slug,
+        content,
+        section_id: sectionId || null,
+        user_id: user.id, // Include user_id for RLS
+        updated_at: new Date().toISOString()
+      };
+
+      if (postId) {
         // Update existing post
         const { error } = await supabase
           .from('dynamic_posts')
-          .update({
-            title,
-            content,
-            slug,
-            section_id: content.category || sectionId,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', currentPostId);
+          .update(postData)
+          .eq('id', postId);
           
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
-        }
+        if (error) throw error;
       } else {
-        // Create new post as draft
+        // Create new post
         const { data, error } = await supabase
           .from('dynamic_posts')
-          .insert([{
-            section_id: content.category || sectionId,
-            title,
-            content,
-            slug,
-            is_published: false
-          }])
+          .insert([postData])
           .select()
           .single();
           
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
-        // Update current post ID and URL
-        if (data) {
-          setCurrentPostId(data.id);
-          window.history.replaceState({}, '', `/admin/posts/${data.id}`);
+        // Update the URL to include the new post ID
+        if (data && window.history.replaceState) {
+          window.history.replaceState(null, '', `/admin/posts/${data.id}`);
         }
       }
-      
+
       setLastSaved(new Date());
-      console.log('Post saved successfully');
-
-      // Also save to localStorage as backup
-      const draftData = {
-        id: currentPostId || 'temp-' + Date.now(),
-        title,
-        content: content.html || '',
-        lastModified: new Date(),
-        wordCount: content.html ? content.html.replace(/<[^>]*>/g, '').split(/\s+/).filter((word: string) => word.length > 0).length : 0,
-        status: 'draft' as const
-      };
-
-      const existingDrafts = JSON.parse(localStorage.getItem('drafts') || '[]');
-      const draftIndex = existingDrafts.findIndex((draft: any) => draft.id === draftData.id);
-      
-      if (draftIndex >= 0) {
-        existingDrafts[draftIndex] = draftData;
-      } else {
-        existingDrafts.push(draftData);
-      }
-      
-      localStorage.setItem('drafts', JSON.stringify(existingDrafts));
-      
     } catch (error: any) {
-      console.error('Save failed:', error);
-      toast.error('Save failed: ' + (error.message || 'An error occurred while saving'));
+      console.error('Error saving post:', error);
+      toast.error('Failed to save post: ' + error.message);
     } finally {
       setSaving(false);
     }
-  }, [title, content, currentPostId, sectionId]);
-
-  // Auto-save every 5 seconds when content changes
-  useEffect(() => {
-    if (!title.trim()) return;
-    
-    const timer = setTimeout(() => {
-      if (title !== initialTitle || JSON.stringify(content) !== JSON.stringify(initialContent)) {
-        save();
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [title, content, save, initialTitle, initialContent]);
+  };
 
   return {
     title,

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface Draft {
@@ -20,21 +21,32 @@ interface Draft {
 }
 
 const DraftManager = () => {
+  const { user } = useAuth();
   const [localDrafts, setLocalDrafts] = useState<Draft[]>([]);
 
-  // Fetch drafts from database
+  // Fetch drafts from database - only for authenticated users
   const { data: dbDrafts, refetch } = useQuery({
-    queryKey: ['drafts'],
+    queryKey: ['drafts', user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      if (!user) return [];
+      
+      const { data, error } = await supabase
         .from('dynamic_posts')
         .select(`
           *,
           sections(title)
         `)
+        .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching drafts:', error);
+        return [];
+      }
+      
       return data || [];
     },
+    enabled: !!user,
   });
 
   useEffect(() => {
@@ -78,7 +90,7 @@ const DraftManager = () => {
       });
     }
     
-    // Add local drafts that aren't in database
+    // Add local drafts that aren't in database (only for backwards compatibility)
     localDrafts.forEach(localDraft => {
       if (!combined.find(d => d.id === localDraft.id)) {
         combined.push(localDraft);
@@ -89,22 +101,31 @@ const DraftManager = () => {
   }, [dbDrafts, localDrafts]);
 
   const deleteDraft = async (id: string) => {
+    if (!user) {
+      toast.error('Please log in to delete drafts');
+      return;
+    }
+
     try {
       // Try to delete from database first
       const { error } = await supabase
         .from('dynamic_posts')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure user can only delete their own posts
       
       if (!error) {
         refetch();
         toast.success('Draft deleted successfully');
+      } else {
+        throw error;
       }
     } catch (error) {
-      console.log('Not in database, removing from localStorage');
+      console.error('Error deleting draft:', error);
+      toast.error('Failed to delete draft');
     }
     
-    // Remove from localStorage
+    // Also remove from localStorage if it exists there
     const updatedLocalDrafts = localDrafts.filter(draft => draft.id !== id);
     setLocalDrafts(updatedLocalDrafts);
     localStorage.setItem('drafts', JSON.stringify(updatedLocalDrafts));
@@ -118,6 +139,24 @@ const DraftManager = () => {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <Card className="bg-slate-800 border-slate-700 p-8">
+          <CardContent className="text-center">
+            <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 mb-4">Please log in to view your drafts</p>
+            <Link to="/auth">
+              <Button className="bg-blue-500 hover:bg-blue-600">
+                Log In
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
