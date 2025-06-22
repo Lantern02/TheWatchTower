@@ -32,10 +32,7 @@ const DraftManager = () => {
       
       const { data, error } = await supabase
         .from('dynamic_posts')
-        .select(`
-          *,
-          sections(title)
-        `)
+        .select('id, title, content, updated_at, is_published, sections(title)')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       
@@ -85,7 +82,7 @@ const DraftManager = () => {
           lastModified: new Date(post.updated_at),
           wordCount: contentText.split(/\s+/).filter(word => word.length > 0).length,
           status: post.is_published ? 'published' : 'draft',
-          sectionTitle: post.sections?.title
+          sectionTitle: (post.sections as any)?.title
         });
       });
     }
