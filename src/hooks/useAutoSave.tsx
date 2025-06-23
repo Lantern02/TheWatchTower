@@ -64,7 +64,6 @@ export const useAutoSave = ({
         slug,
         content,
         section_id: sectionId || null,
-        user_id: user.id, // Include user_id for RLS
         updated_at: new Date().toISOString()
       };
 
