@@ -41,7 +41,7 @@ const DynamicSection = () => {
   if (!section) {
     return (
       <div className="section-container text-center">
-        <h1 className="text-2xl font-serif">Section not found</h1>
+        <h1 className="text-2xl font-serif text-white">Section not found</h1>
       </div>
     );
   }
@@ -59,11 +59,11 @@ const DynamicSection = () => {
             />
           </div>
         )}
-        <h1 className="font-serif text-4xl md:text-5xl font-semibold text-primary mb-6">
+        <h1 className="font-serif text-4xl md:text-5xl font-semibold text-orange-500 mb-6">
           {section.title}
         </h1>
         {section.description && (
-          <p className="text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-300 text-xl max-w-2xl mx-auto leading-relaxed">
             {section.description}
           </p>
         )}
@@ -72,7 +72,7 @@ const DynamicSection = () => {
       {/* Posts Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts?.map((post) => (
-          <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300">
+          <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300 bg-slate-800 border-slate-700 hover:border-orange-400">
             <Link to={`/${section.slug}/${post.slug}`}>
               {post.cover_image_url && (
                 <div className="overflow-hidden rounded-t-lg">
@@ -84,15 +84,15 @@ const DynamicSection = () => {
                 </div>
               )}
               <CardContent className="p-6">
-                <h3 className="font-serif text-xl font-semibold text-primary group-hover:text-amber-700 transition-colors duration-300 mb-3">
+                <h3 className="font-serif text-xl font-semibold text-orange-400 group-hover:text-orange-300 transition-colors duration-300 mb-3">
                   {post.title}
                 </h3>
                 {post.excerpt && (
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                  <p className="text-gray-300 leading-relaxed mb-4">
                     {post.excerpt}
                   </p>
                 )}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-sm text-gray-400">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
                     {new Date(post.created_at).toLocaleDateString()}
@@ -110,7 +110,7 @@ const DynamicSection = () => {
 
       {posts?.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-lg">No posts yet in this section.</p>
+          <p className="text-gray-300 text-lg">No posts yet in this section.</p>
         </div>
       )}
     </div>

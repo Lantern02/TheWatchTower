@@ -59,8 +59,8 @@ const Trending = () => {
     <div className="section-container">
       <div className="text-center mb-12">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <TrendingUp className="h-8 w-8 text-orange-600" />
-          <h1 className="text-4xl font-serif font-bold text-white">Trending Now</h1>
+          <TrendingUp className="h-8 w-8 text-orange-500" />
+          <h1 className="text-4xl font-serif font-bold text-orange-500">Trending Now</h1>
         </div>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
           Discover the most popular articles and stories making waves in our community
