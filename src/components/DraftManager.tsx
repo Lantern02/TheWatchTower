@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Clock, Trash2, Edit, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,31 +30,27 @@ const DraftManager = () => {
     queryFn: async () => {
       if (!user) return [];
       
-      try {
-        const { data, error } = await supabase
-          .from('dynamic_posts')
-          .select(`
-            id,
-            title,
-            content,
-            updated_at,
-            is_published,
-            sections (
-              title
-            )
-          `)
-          .order('updated_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching drafts:', error);
-          return [];
-        }
-        
-        return data || [];
-      } catch (error) {
-        console.error('Error in queryFn:', error);
+      const { data, error } = await supabase
+        .from('dynamic_posts')
+        .select(`
+          id,
+          title,
+          content,
+          updated_at,
+          is_published,
+          sections (
+            title
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching drafts:', error);
         return [];
       }
+      
+      return data || [];
     },
     enabled: !!user,
   });
@@ -120,7 +117,8 @@ const DraftManager = () => {
       const { error } = await supabase
         .from('dynamic_posts')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure user can only delete their own posts
       
       if (!error) {
         refetch();
