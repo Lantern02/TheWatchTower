@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, Eye } from 'lucide-react';
+import { Calendar, Eye, BookOpen } from 'lucide-react';
 
 const DynamicSection = () => {
   const { slug } = useParams();
@@ -42,7 +42,9 @@ const DynamicSection = () => {
     return (
       <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-6 py-16 text-center">
+          <BookOpen className="h-12 w-12 text-orange-500 mx-auto mb-6" />
           <h1 className="text-2xl font-serif text-gray-900">Section not found</h1>
+          <p className="text-gray-600 mt-4">The section you're looking for doesn't exist.</p>
         </div>
       </div>
     );
@@ -53,6 +55,7 @@ const DynamicSection = () => {
       {/* Section Header */}
       <section className="bg-gradient-to-br from-orange-50 to-orange-100 py-16">
         <div className="max-w-4xl mx-auto px-6 py-16 text-center">
+          <BookOpen className="h-16 w-16 text-orange-600 mx-auto mb-6" />
           {section.cover_image_url && (
             <div className="w-full h-64 mb-8 overflow-hidden rounded-xl">
               <img
@@ -115,7 +118,9 @@ const DynamicSection = () => {
 
         {posts?.length === 0 && (
           <div className="text-center py-16">
+            <BookOpen className="h-16 w-16 text-orange-300 mx-auto mb-4" />
             <p className="text-gray-600 text-lg">No posts yet in this section.</p>
+            <p className="text-gray-500">Check back soon for new content!</p>
           </div>
         )}
       </section>

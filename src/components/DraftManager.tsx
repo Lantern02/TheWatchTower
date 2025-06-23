@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Clock, Trash2, Edit, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,10 +18,13 @@ interface Draft {
   wordCount: number;
   status: 'draft' | 'published';
   sectionTitle?: string;
+  sectionSlug?: string;
+  slug?: string;
 }
 
 const DraftManager = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [localDrafts, setLocalDrafts] = useState<Draft[]>([]);
 
   // Fetch drafts from database - only for authenticated users
@@ -38,8 +42,10 @@ const DraftManager = () => {
             content,
             updated_at,
             is_published,
+            slug,
             sections (
-              title
+              title,
+              slug
             )
           `)
           .order('updated_at', { ascending: false });
@@ -94,7 +100,9 @@ const DraftManager = () => {
           lastModified: new Date(post.updated_at),
           wordCount: contentText.split(/\s+/).filter(word => word.length > 0).length,
           status: post.is_published ? 'published' : 'draft',
-          sectionTitle: (post.sections as any)?.title
+          sectionTitle: (post.sections as any)?.title,
+          sectionSlug: (post.sections as any)?.slug,
+          slug: post.slug
         });
       });
     }
@@ -148,6 +156,16 @@ const DraftManager = () => {
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
+  const handleEditDraft = (draft: Draft) => {
+    navigate(`/admin/posts/${draft.id}`);
+  };
+
+  const handleViewPublishedPost = (draft: Draft) => {
+    if (draft.sectionSlug && draft.slug) {
+      navigate(`/${draft.sectionSlug}/${draft.slug}`);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
@@ -156,7 +174,7 @@ const DraftManager = () => {
             <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">Please log in to view your drafts</p>
             <Link to="/auth">
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button className="bg-orange-500 hover:bg-orange-600">
                 Log In
               </Button>
             </Link>
@@ -170,11 +188,11 @@ const DraftManager = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText className="h-6 w-6 text-blue-400" />
+          <FileText className="h-6 w-6 text-orange-400" />
           <h2 className="text-2xl font-serif font-bold text-white">Your Drafts</h2>
         </div>
         <Link to="/admin/posts/new">
-          <Button className="bg-blue-500 hover:bg-blue-600">
+          <Button className="bg-orange-500 hover:bg-orange-600">
             <Edit className="h-4 w-4 mr-2" />
             New Draft
           </Button>
@@ -187,7 +205,7 @@ const DraftManager = () => {
             <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No drafts yet</p>
             <Link to="/admin/posts/new">
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button className="bg-orange-500 hover:bg-orange-600">
                 Start Writing
               </Button>
             </Link>
@@ -196,7 +214,7 @@ const DraftManager = () => {
       ) : (
         <div className="grid gap-4">
           {allDrafts.map((draft) => (
-            <Card key={draft.id} className="bg-slate-800 border-slate-700 hover:border-blue-400 transition-colors">
+            <Card key={draft.id} className="bg-slate-800 border-slate-700 hover:border-orange-400 transition-colors">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -223,13 +241,21 @@ const DraftManager = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Link to={`/admin/posts/${draft.id}`}>
-                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-blue-400">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    {draft.status === 'published' && (
-                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-green-400">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-orange-400"
+                      onClick={() => handleEditDraft(draft)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    {draft.status === 'published' && draft.sectionSlug && draft.slug && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-400 hover:text-green-400"
+                        onClick={() => handleViewPublishedPost(draft)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     )}
