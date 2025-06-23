@@ -59,7 +59,7 @@ const Trending = () => {
     <div className="section-container">
       <div className="text-center mb-12">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <TrendingUp className="h-8 w-8 text-blue-400" />
+          <TrendingUp className="h-8 w-8 text-orange-600" />
           <h1 className="text-4xl font-serif font-bold text-white">Trending Now</h1>
         </div>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
@@ -69,11 +69,11 @@ const Trending = () => {
 
       <div className="space-y-6">
         {trendingPosts?.map((post, index) => (
-          <Card key={post.id} className="bg-slate-800 border-slate-700 hover:border-blue-400 transition-colors">
+          <Card key={post.id} className="bg-slate-800 border-slate-700 hover:border-orange-400 transition-colors">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="bg-blue-500 text-white">
+                  <Badge variant="secondary" className="bg-orange-500 text-white">
                     #{index + 1}
                   </Badge>
                   <Badge variant="outline" className="border-slate-600 text-gray-300">
@@ -91,7 +91,7 @@ const Trending = () => {
                   </div>
                 </div>
               </div>
-              <CardTitle className="text-xl font-serif hover:text-blue-400 transition-colors">
+              <CardTitle className="text-xl font-serif hover:text-orange-400 transition-colors">
                 <Link to={`/${post.sections?.slug}/${post.slug}`}>
                   {post.title}
                 </Link>
@@ -108,7 +108,7 @@ const Trending = () => {
                 </div>
                 <Link 
                   to={`/${post.sections?.slug}/${post.slug}`}
-                  className="text-blue-400 hover:text-blue-300 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   Read more →
                 </Link>
