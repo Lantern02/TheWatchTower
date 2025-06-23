@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Menu, User, LogOut, Settings, Bell, Edit, TrendingUp, Bookmark, FileText } from 'lucide-react';
@@ -84,7 +85,7 @@ const Header = () => {
 
   return (
     <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity flex-shrink-0">
@@ -95,7 +96,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center mx-8">
+          <nav className="hidden lg:flex items-center space-x-6 flex-1 justify-center mx-8">
             {filteredSections.map((section) => (
               <Link
                 key={section.id}
@@ -126,17 +127,17 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-8">
+          {/* Search Bar - Desktop Only */}
+          <div className="hidden lg:flex items-center relative flex-shrink-0 mx-4">
             <SearchBar />
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-6 flex-shrink-0">
+          <div className="flex items-center space-x-4 flex-shrink-0">
             {isAuthenticated ? (
               <>
-                {/* Write Button */}
-                <Link to="/admin/posts/new">
+                {/* Write Button - Desktop Only */}
+                <Link to="/admin/posts/new" className="hidden sm:block">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -147,22 +148,11 @@ const Header = () => {
                   </Button>
                 </Link>
 
-                {/* Logout Button */}
+                {/* Notification Bell - Desktop Only */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleSignOut}
-                  className="text-gray-300 hover:text-red-400 hover:bg-slate-700 flex items-center gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
-
-                {/* Notification Bell */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative text-gray-300 hover:text-blue-400 hover:bg-slate-700"
+                  className="hidden sm:flex relative text-gray-300 hover:text-blue-400 hover:bg-slate-700"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
@@ -170,8 +160,9 @@ const Header = () => {
                   </span>
                 </Button>
 
+                {/* User Dropdown - Desktop Only */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild className="hidden sm:flex">
                     <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={profile?.avatar_url || ''} alt={penName} />
@@ -179,7 +170,7 @@ const Header = () => {
                           {penName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden sm:inline text-white font-medium min-w-0">
+                      <span className="text-white font-medium min-w-0">
                         {penName}
                       </span>
                     </div>
@@ -262,16 +253,25 @@ const Header = () => {
             {/* Mobile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger className="lg:hidden">
-                <Menu className="h-5 w-5 text-gray-300" />
+                <Menu className="h-6 w-6 text-gray-300" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-slate-800 border-slate-700 z-50">
+              <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700 z-50">
+                {/* Mobile Search */}
+                <div className="p-3 border-b border-slate-700">
+                  <SearchBar />
+                </div>
+                
+                {/* Navigation Links */}
                 {filteredSections.map((section) => (
                   <DropdownMenuItem key={section.id} asChild>
                     <Link to={`/${section.slug}`} className="text-gray-300 hover:text-blue-400">{section.title}</Link>
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuItem asChild>
-                  <Link to="/trending" className="text-gray-300 hover:text-blue-400">Trending</Link>
+                  <Link to="/trending" className="text-gray-300 hover:text-blue-400 flex items-center">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Trending
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/about" className="text-gray-300 hover:text-blue-400">About</Link>
@@ -279,6 +279,48 @@ const Header = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/store" className="text-gray-300 hover:text-blue-400">Store</Link>
                 </DropdownMenuItem>
+                
+                {/* Authenticated User Options */}
+                {isAuthenticated && (
+                  <>
+                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/posts/new" className="text-gray-300 hover:text-blue-400 flex items-center">
+                        <Edit className="mr-2 h-4 w-4" />
+                        Write
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="text-gray-300 hover:text-blue-400 flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="text-gray-300 hover:text-blue-400 flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/drafts" className="text-gray-300 hover:text-blue-400 flex items-center">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Drafts
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/bookmarks" className="text-gray-300 hover:text-blue-400 flex items-center">
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        Bookmarks
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-gray-300 hover:text-red-400 flex items-center">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
