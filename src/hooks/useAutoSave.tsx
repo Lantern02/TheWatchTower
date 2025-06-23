@@ -22,6 +22,7 @@ export const useAutoSave = ({
   const [content, setContent] = useState(initialContent);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [currentPostId, setCurrentPostId] = useState<string | undefined>(postId);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Auto-save when title or content changes
@@ -67,27 +68,58 @@ export const useAutoSave = ({
         updated_at: new Date().toISOString()
       };
 
-      if (postId) {
+      if (currentPostId) {
         // Update existing post
         const { error } = await supabase
           .from('dynamic_posts')
           .update(postData)
-          .eq('id', postId);
+          .eq('id', currentPostId);
           
         if (error) throw error;
       } else {
-        // Create new post
-        const { data, error } = await supabase
+        // Check if a draft with the same title already exists for this user
+        const { data: existingPosts, error: searchError } = await supabase
           .from('dynamic_posts')
-          .insert([postData])
-          .select()
-          .single();
+          .select('id')
+          .eq('title', title)
+          .eq('section_id', sectionId || null)
+          .eq('is_published', false);
+
+        if (searchError) throw searchError;
+
+        if (existingPosts && existingPosts.length > 0) {
+          // Update the existing draft instead of creating a new one
+          const existingPostId = existingPosts[0].id;
+          const { error } = await supabase
+            .from('dynamic_posts')
+            .update(postData)
+            .eq('id', existingPostId);
+            
+          if (error) throw error;
           
-        if (error) throw error;
-        
-        // Update the URL to include the new post ID
-        if (data && window.history.replaceState) {
-          window.history.replaceState(null, '', `/admin/posts/${data.id}`);
+          setCurrentPostId(existingPostId);
+          
+          // Update the URL to include the existing post ID
+          if (window.history.replaceState) {
+            window.history.replaceState(null, '', `/admin/posts/${existingPostId}`);
+          }
+        } else {
+          // Create new post only if no existing draft found
+          const { data, error } = await supabase
+            .from('dynamic_posts')
+            .insert([postData])
+            .select()
+            .single();
+            
+          if (error) throw error;
+          
+          if (data) {
+            setCurrentPostId(data.id);
+            // Update the URL to include the new post ID
+            if (window.history.replaceState) {
+              window.history.replaceState(null, '', `/admin/posts/${data.id}`);
+            }
+          }
         }
       }
 
@@ -107,6 +139,7 @@ export const useAutoSave = ({
     setContent,
     saving,
     lastSaved,
-    save
+    save,
+    currentPostId
   };
 };

@@ -73,15 +73,6 @@ const DraftCard = ({ draft, onDelete }: DraftCardProps) => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-400 hover:text-orange-400"
-              onClick={handleEdit}
-              title="Edit draft"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
             {draft.status === 'published' && draft.sectionSlug && draft.slug && (
               <Button 
                 variant="ghost" 
@@ -106,9 +97,16 @@ const DraftCard = ({ draft, onDelete }: DraftCardProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-300 line-clamp-2">
+        <p className="text-gray-300 line-clamp-2 mb-4">
           {draft.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
         </p>
+        <Button 
+          onClick={handleEdit}
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          Continue Editing
+        </Button>
       </CardContent>
     </Card>
   );

@@ -28,7 +28,8 @@ export const useEditorState = ({
     setContent,
     saving,
     lastSaved,
-    save
+    save,
+    currentPostId
   } = useAutoSave({
     postId,
     sectionId,
@@ -46,12 +47,13 @@ export const useEditorState = ({
   // Load initial publish state and other data when postId is available
   useEffect(() => {
     const loadPostData = async () => {
-      if (postId) {
+      const idToLoad = currentPostId || postId;
+      if (idToLoad) {
         try {
           const { data, error } = await supabase
             .from('dynamic_posts')
             .select('*')
-            .eq('id', postId)
+            .eq('id', idToLoad)
             .single();
           
           if (error) throw error;
@@ -68,7 +70,7 @@ export const useEditorState = ({
     };
 
     loadPostData();
-  }, [postId]);
+  }, [currentPostId, postId]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,8 +110,9 @@ export const useEditorState = ({
       // First save the current content
       await save();
       
-      // Then update the publish state
-      if (postId) {
+      // Then update the publish state using the current post ID
+      const idToUpdate = currentPostId || postId;
+      if (idToUpdate) {
         const { error } = await supabase
           .from('dynamic_posts')
           .update({ 
@@ -118,7 +121,7 @@ export const useEditorState = ({
             excerpt: excerpt || content.html?.replace(/<[^>]*>/g, '').substring(0, 200),
             updated_at: new Date().toISOString()
           })
-          .eq('id', postId);
+          .eq('id', idToUpdate);
           
         if (error) throw error;
         
@@ -169,6 +172,7 @@ export const useEditorState = ({
     handleImageUpload,
     handleContentChange,
     togglePublish,
-    wordCount
+    wordCount,
+    currentPostId
   };
 };
