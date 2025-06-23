@@ -64,7 +64,7 @@ const About = () => {
             <div className="space-y-12">
               {/* Main Bio */}
               <div>
-                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
+                <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-6">
                   My Story
                 </h2>
                 <ContentEditor
@@ -80,7 +80,7 @@ This corner of the internet serves as my watchtower—a place from which I obser
 
               {/* Philosophy */}
               <div className="bg-orange-50 rounded-xl p-8 md:p-12">
-                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-6">
+                <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-6">
                   My Writing Philosophy
                 </h2>
                 <ContentEditor
@@ -96,7 +96,7 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
               {/* What You'll Find */}
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="font-serif text-xl font-semibold text-gray-900 mb-4">
+                  <h3 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
                     What You'll Find Here
                   </h3>
                   <ContentEditor
@@ -112,7 +112,7 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
                 </div>
                 
                 <div>
-                  <h3 className="font-serif text-xl font-semibold text-gray-900 mb-4">
+                  <h3 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
                     My Hope for You
                   </h3>
                   <ContentEditor
@@ -128,7 +128,7 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
               <div className="bg-white border border-orange-200 rounded-xl p-8 md:p-12 shadow-sm">
                 <div className="text-center mb-8">
                   <Mail className="h-10 w-10 text-orange-700 mx-auto mb-4" />
-                  <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+                  <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
                     Get in Touch
                   </h2>
                   <p className="text-gray-600 max-w-lg mx-auto">
@@ -236,7 +236,7 @@ In a world full of noise, I choose to write from the quiet spaces—those in-bet
               {/* Newsletter Signup */}
               <div className="bg-orange-50 rounded-xl p-8 md:p-12 text-center">
                 <BookOpen className="h-10 w-10 text-orange-700 mx-auto mb-6" />
-                <h2 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+                <h2 className="font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
                   Join the Newsletter
                 </h2>
                 <ContentEditor

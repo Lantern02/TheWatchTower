@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
-import { FileText, Clock, Trash2, Edit, Eye } from 'lucide-react';
+import { FileText, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import DraftCard from './DraftCard';
 
 interface Draft {
   id: string;
@@ -24,7 +23,6 @@ interface Draft {
 
 const DraftManager = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [localDrafts, setLocalDrafts] = useState<Draft[]>([]);
 
   // Fetch drafts from database - only for authenticated users
@@ -147,25 +145,6 @@ const DraftManager = () => {
     localStorage.setItem('drafts', JSON.stringify(updatedLocalDrafts));
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
-  };
-
-  const handleEditDraft = (draft: Draft) => {
-    navigate(`/admin/posts/${draft.id}`);
-  };
-
-  const handleViewPublishedPost = (draft: Draft) => {
-    if (draft.sectionSlug && draft.slug) {
-      navigate(`/${draft.sectionSlug}/${draft.slug}`);
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
@@ -214,68 +193,11 @@ const DraftManager = () => {
       ) : (
         <div className="grid gap-4">
           {allDrafts.map((draft) => (
-            <Card key={draft.id} className="bg-slate-800 border-slate-700 hover:border-orange-400 transition-colors">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-serif text-white mb-2">
-                      {draft.title || 'Untitled Draft'}
-                    </CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>Modified {formatTimeAgo(draft.lastModified)}</span>
-                      </div>
-                      <span>{draft.wordCount} words</span>
-                      <Badge 
-                        variant={draft.status === 'published' ? 'default' : 'secondary'}
-                        className={draft.status === 'published' ? 'bg-green-500' : 'bg-gray-600'}
-                      >
-                        {draft.status}
-                      </Badge>
-                      {draft.sectionTitle && (
-                        <Badge variant="outline" className="border-slate-600 text-gray-300">
-                          {draft.sectionTitle}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-orange-400"
-                      onClick={() => handleEditDraft(draft)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    {draft.status === 'published' && draft.sectionSlug && draft.slug && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-gray-400 hover:text-green-400"
-                        onClick={() => handleViewPublishedPost(draft)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-400"
-                      onClick={() => deleteDraft(draft.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-300 line-clamp-2">
-                  {draft.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
-                </p>
-              </CardContent>
-            </Card>
+            <DraftCard 
+              key={draft.id} 
+              draft={draft} 
+              onDelete={deleteDraft}
+            />
           ))}
         </div>
       )}

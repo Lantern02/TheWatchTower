@@ -68,10 +68,19 @@ const DynamicSection = () => {
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
             {section.title}
           </h1>
-          {section.description && (
+          {section.description ? (
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               {section.description}
             </p>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <p className="text-xl text-gray-600 leading-relaxed mb-4">
+                Stories that illuminate truth through simple wisdom. Here you'll find timeless parables that speak to the heart and offer gentle guidance for life's journey.
+              </p>
+              <p className="text-lg text-gray-500 leading-relaxed">
+                Each parable is a small window into deeper understanding, crafted to resonate with the quiet moments of reflection we all need.
+              </p>
+            </div>
           )}
         </div>
       </section>
@@ -119,8 +128,8 @@ const DynamicSection = () => {
         {posts?.length === 0 && (
           <div className="text-center py-16">
             <BookOpen className="h-16 w-16 text-orange-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No posts yet in this section.</p>
-            <p className="text-gray-500">Check back soon for new content!</p>
+            <p className="text-gray-600 text-lg">No parables yet in this section.</p>
+            <p className="text-gray-500">Check back soon for new wisdom and stories!</p>
           </div>
         )}
       </section>
