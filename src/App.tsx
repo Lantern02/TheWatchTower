@@ -19,6 +19,7 @@ import Trending from "./pages/Trending";
 import Bookmarks from "./pages/Bookmarks";
 import Drafts from "./pages/Drafts";
 import Profile from "./pages/Profile";
+import Blog from "./pages/Blog";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/store" element={<Store />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/blog" element={<Blog />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
