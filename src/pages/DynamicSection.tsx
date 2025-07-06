@@ -89,39 +89,39 @@ const DynamicSection = () => {
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts?.map((post) => (
-            <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300 border-orange-200 hover:border-orange-400">
-              <Link to={`/${section.slug}/${post.slug}`}>
-                {post.cover_image_url && (
-                  <div className="overflow-hidden rounded-t-lg">
-                    <img
-                      src={post.cover_image_url}
-                      alt={post.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
-                <CardContent className="p-6">
-                  <h3 className="font-serif text-xl font-semibold text-orange-700 group-hover:text-orange-600 transition-colors duration-300 mb-3">
-                    {post.title}
-                  </h3>
-                  {post.excerpt && (
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      {post.view_count || 0} views
-                    </div>
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
+                <Card key={post.id} className="group hover:shadow-lg transition-shadow duration-300 border-border hover:border-primary">
+                  <Link to={`/${section.slug}/${post.slug}`}>
+                    {post.cover_image_url && (
+                      <div className="overflow-hidden rounded-t-lg">
+                        <img
+                          src={post.cover_image_url}
+                          alt={post.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <CardContent className="p-6">
+                      <h3 className="font-serif text-xl font-semibold text-primary group-hover:text-primary/80 transition-colors duration-300 mb-3">
+                        {post.title}
+                      </h3>
+                      {post.excerpt && (
+                        <p className="text-muted-foreground leading-relaxed mb-4">
+                          {post.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(post.created_at).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {post.view_count || 0} views
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
           ))}
         </div>
 

@@ -22,6 +22,7 @@ import Bookmarks from "./pages/Bookmarks";
 import Drafts from "./pages/Drafts";
 import Profile from "./pages/Profile";
 import Blog from "./pages/Blog";
+import PostView from "./pages/PostView";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
                   <EditPostEditor />
                 </ProtectedRoute>
               } />
+              <Route path="/:sectionSlug/:postSlug" element={<PostView />} />
               <Route path="/:slug" element={<DynamicSection />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
