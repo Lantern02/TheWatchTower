@@ -1,5 +1,5 @@
 
-import { BookOpen, Feather, Heart, Star, TrendingUp, Eye } from 'lucide-react';
+import { BookOpen, Feather, Heart, Star, TrendingUp, Eye, Youtube, Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -145,6 +145,78 @@ const Index = () => {
                 Read Prophecy <Eye className="h-4 w-4" />
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Media Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <ContentEditor
+            page="home"
+            sectionKey="social-title"
+            title="Social Media Section Title"
+            defaultContent="<h2 class='font-serif text-3xl md:text-4xl font-semibold text-gray-900 mb-6'>Connect With Me</h2>"
+            className="mb-6"
+          />
+          <ContentEditor
+            page="home"
+            sectionKey="social-description"
+            title="Social Media Section Description"
+            defaultContent="<p class='text-gray-600 text-lg mb-12 max-w-2xl mx-auto'>Follow along on social media for daily inspiration, behind-the-scenes content, and community discussions.</p>"
+            className="mb-12"
+          />
+          
+          <div className="flex flex-wrap justify-center gap-6">
+            <a
+              href="https://youtube.com/@yourhandle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Youtube className="h-6 w-6 text-red-600 group-hover:text-red-700" />
+              <span className="font-medium text-gray-900 group-hover:text-red-700">YouTube</span>
+            </a>
+            
+            <a
+              href="https://twitter.com/yourhandle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Twitter className="h-6 w-6 text-blue-500 group-hover:text-blue-600" />
+              <span className="font-medium text-gray-900 group-hover:text-blue-600">Twitter</span>
+            </a>
+            
+            <a
+              href="https://instagram.com/yourhandle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Instagram className="h-6 w-6 text-pink-600 group-hover:text-pink-700" />
+              <span className="font-medium text-gray-900 group-hover:text-pink-700">Instagram</span>
+            </a>
+            
+            <a
+              href="https://linkedin.com/in/yourprofile"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Linkedin className="h-6 w-6 text-blue-700 group-hover:text-blue-800" />
+              <span className="font-medium text-gray-900 group-hover:text-blue-800">LinkedIn</span>
+            </a>
+            
+            <a
+              href="https://facebook.com/yourpage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Facebook className="h-6 w-6 text-blue-600 group-hover:text-blue-700" />
+              <span className="font-medium text-gray-900 group-hover:text-blue-700">Facebook</span>
+            </a>
           </div>
         </div>
       </section>
