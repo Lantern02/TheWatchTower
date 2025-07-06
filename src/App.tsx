@@ -15,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import DynamicSection from "./pages/DynamicSection";
 import MediumEditor from "./components/MediumEditor";
+import NewPostEditor from "./components/NewPostEditor";
+import EditPostEditor from "./components/EditPostEditor";
 import Trending from "./pages/Trending";
 import Bookmarks from "./pages/Bookmarks";
 import Drafts from "./pages/Drafts";
@@ -29,7 +31,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-slate-900">
+        <div className="min-h-screen flex flex-col bg-background">
           <Header />
           <main className="flex-1 w-full">
             <Routes>
@@ -61,17 +63,12 @@ const App = () => (
               } />
               <Route path="/admin/posts/new" element={
                 <ProtectedRoute>
-                  <MediumEditor 
-                    sectionId={new URLSearchParams(window.location.search).get('section') || ''} 
-                  />
+                  <NewPostEditor />
                 </ProtectedRoute>
               } />
               <Route path="/admin/posts/:postId" element={
                 <ProtectedRoute>
-                  <MediumEditor 
-                    postId={window.location.pathname.split('/').pop()} 
-                    sectionId=""
-                  />
+                  <EditPostEditor />
                 </ProtectedRoute>
               } />
               <Route path="/:slug" element={<DynamicSection />} />
