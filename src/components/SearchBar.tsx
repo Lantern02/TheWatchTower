@@ -18,17 +18,17 @@ const SearchBar = ({ className = "" }: { className?: string }) => {
 
   return (
     <form onSubmit={handleSubmit} className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search articles, topics..."
-        className="pl-10 bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+        className="pl-10 pr-20 bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
       />
       <Button 
         type="submit" 
         size="sm" 
-        className="absolute right-1 top-1/2 transform -translate-y-1/2"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
         disabled={!query.trim()}
       >
         Search
