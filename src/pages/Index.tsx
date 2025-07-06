@@ -1,5 +1,5 @@
 
-import { BookOpen, Feather, Heart, Star, TrendingUp, Eye, Youtube, Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
+import { BookOpen, Feather, Heart, Star, TrendingUp, Eye, Youtube, Twitter, Instagram, Facebook, Music } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -169,7 +169,7 @@ const Index = () => {
           
           <div className="flex flex-wrap justify-center gap-6">
             <a
-              href="https://youtube.com/@yourhandle"
+              href="https://www.youtube.com/@WordBasketForNations"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
@@ -179,17 +179,27 @@ const Index = () => {
             </a>
             
             <a
-              href="https://twitter.com/yourhandle"
+              href="https://x.com/DwatcherAbove"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
-              <Twitter className="h-6 w-6 text-blue-500 group-hover:text-blue-600" />
-              <span className="font-medium text-gray-900 group-hover:text-blue-600">Twitter</span>
+              <Twitter className="h-6 w-6 text-gray-900 group-hover:text-black" />
+              <span className="font-medium text-gray-900 group-hover:text-black">X</span>
             </a>
             
             <a
-              href="https://instagram.com/yourhandle"
+              href="https://www.tiktok.com/@lightbearer012"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Music className="h-6 w-6 text-purple-600 group-hover:text-purple-700" />
+              <span className="font-medium text-gray-900 group-hover:text-purple-700">TikTok</span>
+            </a>
+            
+            <a
+              href="https://www.instagram.com/the_light_bearer01/?hl=en"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
@@ -199,17 +209,7 @@ const Index = () => {
             </a>
             
             <a
-              href="https://linkedin.com/in/yourprofile"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <Linkedin className="h-6 w-6 text-blue-700 group-hover:text-blue-800" />
-              <span className="font-medium text-gray-900 group-hover:text-blue-800">LinkedIn</span>
-            </a>
-            
-            <a
-              href="https://facebook.com/yourpage"
+              href="https://www.facebook.com/ifeatu.chuka.edozie"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
