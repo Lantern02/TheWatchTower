@@ -1,54 +1,39 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import SearchResults from './SearchResults';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
-const SearchBar = () => {
+const SearchBar = ({ className = "" }: { className?: string }) => {
   const [query, setQuery] = useState('');
-  const [showResults, setShowResults] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value;
-    setQuery(newQuery);
-    setShowResults(newQuery.trim().length > 0);
-  };
-
-  const handleInputFocus = () => {
-    if (query.trim().length > 0) {
-      setShowResults(true);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
   return (
-    <div ref={searchRef} className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <form onSubmit={handleSubmit} className={`relative ${className}`}>
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         value={query}
-        onChange={handleInputChange}
-        onFocus={handleInputFocus}
-        placeholder="Search articles, topics, authors..."
-        className="pl-10 w-96 bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search articles, topics..."
+        className="pl-10 bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
       />
-      {showResults && (
-        <SearchResults 
-          query={query} 
-          onClose={() => setShowResults(false)} 
-        />
-      )}
-    </div>
+      <Button 
+        type="submit" 
+        size="sm" 
+        className="absolute right-1 top-1/2 transform -translate-y-1/2"
+        disabled={!query.trim()}
+      >
+        Search
+      </Button>
+    </form>
   );
 };
 

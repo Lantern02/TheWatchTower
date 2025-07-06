@@ -23,6 +23,7 @@ import Drafts from "./pages/Drafts";
 import Profile from "./pages/Profile";
 import Blog from "./pages/Blog";
 import PostView from "./pages/PostView";
+import SearchResults from "./pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
                   <EditPostEditor />
                 </ProtectedRoute>
               } />
+              <Route path="/search" element={<SearchResults />} />
               <Route path="/:sectionSlug/:postSlug" element={<PostView />} />
               <Route path="/:slug" element={<DynamicSection />} />
               <Route path="*" element={<NotFound />} />

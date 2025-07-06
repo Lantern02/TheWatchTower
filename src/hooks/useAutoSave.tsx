@@ -65,6 +65,7 @@ export const useAutoSave = ({
         slug,
         content,
         section_id: sectionId || null,
+        user_id: user.id, // Add user_id to track authorship
         updated_at: new Date().toISOString()
       };
 
@@ -73,7 +74,8 @@ export const useAutoSave = ({
         const { error } = await supabase
           .from('dynamic_posts')
           .update(postData)
-          .eq('id', currentPostId);
+          .eq('id', currentPostId)
+          .eq('user_id', user.id); // Ensure user can only update their own posts
           
         if (error) throw error;
       } else {
@@ -83,6 +85,7 @@ export const useAutoSave = ({
           .select('id')
           .eq('title', title)
           .eq('section_id', sectionId || null)
+          .eq('user_id', user.id) // Check user's own posts only
           .eq('is_published', false);
 
         if (searchError) throw searchError;
@@ -93,7 +96,8 @@ export const useAutoSave = ({
           const { error } = await supabase
             .from('dynamic_posts')
             .update(postData)
-            .eq('id', existingPostId);
+            .eq('id', existingPostId)
+            .eq('user_id', user.id);
             
           if (error) throw error;
           

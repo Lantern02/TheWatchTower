@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,27 +11,36 @@ import { Users, Eye, BookOpen, TrendingUp, Plus, FolderPlus, Trash2, FileText, E
 import { toast } from 'sonner';
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const [newCategoryTitle, setNewCategoryTitle] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
 
   const { data: stats } = useQuery({
-    queryKey: ['admin-stats'],
+    queryKey: ['admin-stats', user?.id],
     queryFn: async () => {
-      const [subscribersRes, postsRes, analyticsRes] = await Promise.all([
+      // Get all stats
+      const [subscribersRes, allPostsRes, userPostsRes, analyticsRes] = await Promise.all([
         supabase.from('newsletter_subscribers').select('count').eq('active', true),
-        supabase.from('dynamic_posts').select('id, title, view_count, read_completion_count'),
+        supabase.from('dynamic_posts').select('id, title, view_count, read_completion_count, is_published'),
+        user ? supabase.from('dynamic_posts').select('id, title, view_count, read_completion_count, is_published').eq('user_id', user.id) : Promise.resolve({ data: [] }),
         supabase.from('post_analytics').select('*')
       ]);
 
-      const totalViews = postsRes.data?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0;
-      const totalReads = postsRes.data?.reduce((sum, post) => sum + (post.read_completion_count || 0), 0) || 0;
+      const userPosts = userPostsRes.data || [];
+      const totalViews = userPosts.reduce((sum, post) => sum + (post.view_count || 0), 0);
+      const totalReads = userPosts.reduce((sum, post) => sum + (post.read_completion_count || 0), 0);
+      const publishedCount = userPosts.filter(p => p.is_published).length;
+      const draftCount = userPosts.filter(p => !p.is_published).length;
       
       return {
         subscribers: subscribersRes.count || 0,
-        totalPosts: postsRes.data?.length || 0,
+        totalPosts: allPostsRes.data?.length || 0,
+        userTotalPosts: userPosts.length,
+        userPublishedCount: publishedCount,
+        userDraftCount: draftCount,
         totalViews,
         totalReads,
-        posts: postsRes.data || []
+        posts: userPosts
       };
     },
   });
@@ -264,21 +274,27 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+            <CardTitle className="text-sm font-medium">Your Posts</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalPosts || 0}</div>
+            <div className="text-2xl font-bold">{stats?.userTotalPosts || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats?.userPublishedCount || 0} published, {stats?.userDraftCount || 0} drafts
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <CardTitle className="text-sm font-medium">Your Views</CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalViews || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Across your published posts
+            </p>
           </CardContent>
         </Card>
 
